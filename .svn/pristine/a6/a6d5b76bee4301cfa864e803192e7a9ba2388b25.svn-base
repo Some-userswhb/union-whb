@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+    <style>
+        .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+            width: 50%;
+            display: inline-block;
+        }
+
+        .help-block.m-b-none {
+            display: inline;
+            margin-left: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .juzhong th, .juzhong2 td {
+            text-align: center;
+        }
+
+        ul {
+            display: block;
+            list-style: none;
+            cursor: pointer;
+        }
+
+        #lv3U2, #lv3U3 {
+            display: none;
+        }
+
+        .lv3U1, #lv3U2, #lv3U3 {
+            padding-left: 60px;
+        }
+        #lv1U{
+            margin-top: 10px;
+        }
+        #tree, #lv1U {
+            overflow: hidden;
+        }
+        #tree{
+            overflow-y: scroll;
+            height: 298px;
+
+        }
+        #tree::-webkit-scrollbar{
+            width: 3px;
+        }
+        #tree i {
+            float: left;
+            font-size: 20px;
+            color: #ccc;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        #tree .listbox {
+            height: 35px;
+        }
+
+        .icheckbox_square-green {
+            float: left;
+        }
+
+        .lv3Checks {
+            display: block;
+            float: left;
+            clear: left;
+            width: 15px;
+            height: 15px;
+        }
+        .management{
+            border:none;
+            outline: none;
+            background-color: rgba(225,225,225,1);
+            padding: 8px 12px;
+            margin-right: 10px;
+        }
+        .Permission .col-sm-2{
+            background-color: rgb(243,243,244);
+            height: 302px;
+        }
+        .Permission .col-sm-10{
+            background-color: white;
+            height: 302px;
+            border: 2px solid rgb(206,206,206);
+        }
+
+        .Permission .col-sm-10 span {
+            display: block;
+            font-size: 30px;
+            font-weight: bold;
+            float: left;
+            margin-top: -5px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .chenblock{
+            width: 100%;
+        }
+        .nav-tabs{
+            width: 100%;
+        }
+        .rightt{
+            margin-left:25px;
+        }
+        .tabs-container{
+            height: 100%;
+        }
+        .tabs-container .nav-tabs{
+            height: 100%;
+            border: none;
+            overflow-y: auto;
+        }
+        .tabs-container .nav-tabs::-webkit-scrollbar{
+            width: 1px;
+        }
+        .nav-tabs li{
+            width: 100%;
+        }
+        .Permission .col-sm-2 {
+            padding-left: 0 ;
+            padding-right: 0;
+
+        }
+        .checkbox-inline{
+            margin: 0;
+            white-space: nowrap;
+        }
+        .Permission .col-sm-2 .active a{
+            margin-right: 0;
+            border: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="row" id="adduserrole">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="signupForm">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;操作角色：</label>
+                        <div class="col-sm-8">
+                            <input id="lastname" name="lastname" class="form-control" type="text" aria-required="true"
+                                   aria-invalid="false" class="valid">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;角色状态：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control"  id="laborunKind" v-model="istrue">
+                                <option>{{istrue}}</option>
+                                <option>停职</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;添加备注：</label>
+                        <div class="col-sm-8">
+                            <textarea id="remark" name="remark" style="width:50% "
+                                      class="form-control" placeholder="最多输入200字"
+                                      aria-required="true" style="resize: none" ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;可用系统：</label>
+                        <div class="col-sm-8">
+                            <button class="management" v-for="(item,index) in funPurview" >{{item.name}}</button>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;功能权限：</label>
+                        <div class="col-sm-8 Permission">
+                           <div class="col-sm-2">
+                               <div class="tabs-container">
+                                   <ul class="nav nav-tabs ">
+                                       <li :class="{active:isActive == index}"  v-for="(item,index) in funPurview" :key="index">
+                                           <a data-toggle="tab" href="#tab-1">
+                                                <label class="checkbox-inline i-checks" @click="onsystem(item.systemCode,item.name)">
+                                                    <div class="icheckbox_square-green" style="position: relative;" id="insparent">
+                                                        <input type="checkbox" value="option1" name="nocheck" class="allCheck"
+                                                               style="position: absolute; opacity: 0;">
+                                                        <ins class="iCheck-helper"
+                                                             style="position: absolute; top: 0%; left: 0%;
+                                                            display: block; width: 100%; height: 100%;
+                                                            margin: 0px; padding: 0px;
+                                                            background: rgb(255, 255, 255); border: 0px; opacity: 0;"
+                                                             onclick="rightallsele(this)"></ins>
+                                                    </div>{{item.name}}
+                                                </label>
+                                           </a>
+                                       </li>
+                                   </ul>
+
+                               </div>
+                           </div>
+                           <div class="col-sm-10">
+                               <div class="form-group juzhong juzhong2">
+                                       <div>
+                                           <div id="tree" >
+                                               <ul id="lv1U">
+                                                   <i class="fa fa-minus-circle" id="lv1M" ></i>
+                                                   <input type="checkbox" class="i-checks" name="lv3_1Check" id="allCheck"/>
+                                                   <li id="lv1L1">{{userrolename}}
+                                                       <ul class="lv2U" style="clear: left;"
+                                                           v-for="(rigitem,index) in rightmenu">
+                                                           <i class="fa fa-minus-circle lv2M1"  style="clear: left;"
+                                                              onclick="SEClist(this)"></i>
+                                                           <input type="checkbox" class="i-checks secondCheck1" name="lv3_1Check">
+                                                           <li class="lv2L1">{{rigitem.name}}
+                                                               <ul class="lv3U1" style="clear: left;">
+                                                                   <div class="listbox"
+                                                                        v-for="(items,index) in rigitem.children">
+                                                                       <input type="checkbox" name="lv3_1Check"
+                                                                              class="lv3Checks i-checks"/>
+                                                                       <li>{{items.name}}</li>
+
+
+                                                                       
+
+                                                                   </div>
+                                                               </ul>
+                                                           </li>
+                                                       </ul>
+                                                   </li>
+                                               </ul>
+                                           </div>
+                                       </div>
+                               </div>
+                           </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <button class="btn btn-primary" type="submit">确定</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#adduserrole',
+        data: {
+            menuList: [],
+            funPurview:[],
+            isActive:false,
+            rightmenu:[],
+            menuitemzi:"",
+            istrue:'正常',
+            firstlevel:"",
+            userrolecode:"",
+            userrolename:"通知管理",
+        },
+        methods: {
+
+            onsystem(systemCode,systemname) {
+                var that = this;
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: userUrl + "/sso/ssoResource/getSelfResource",
+                    data: Qs.stringify({
+                        "code":  systemCode
+                    })
+                }).then(function (res){
+                    that.rightmenu = res.data.data.menuList
+                    that.userrolecode = systemCode
+                    that.userrolename = systemname
+
+                });
+            }
+
+
+
+        },
+        mounted(){
+
+            var that = this;
+            //默认显示通知管理
+
+            axios({
+                method: 'post',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                url: userUrl + "/sso/ssoResource/getSelfResource",
+                data: Qs.stringify({
+                    "code":  'S1004'
+                })
+            }).then(function (res){
+                if(res.data.code === '0'){
+                    if(res.data.data.menuList != undefined){
+                        that.rightmenu = res.data.data.menuList
+                    }
+                }
+            });
+
+
+            axios({
+                method: 'post',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                url: userUrl + "/sso/ssoResource/getchildSysResource",
+                data: Qs.stringify({
+                    "code":  "S1003"
+                })
+            })
+                .then(function (res){
+                that.funPurview = res.data.data.chilSystemList
+
+                
+            });
+            
+            axios({
+                method: 'post',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                url: userUrl + "/sso/ssoResource/getSelfResource",
+                data: Qs.stringify({
+                    "code":  that.userrolecode
+                })
+
+            })
+                .then(function (res){
+
+                if(res.data.code === '0'){
+                    if(res.data.data.menuList != undefined){
+                        that.rightmenu = res.data.data.menuList
+                    }
+                }
+            });
+
+
+        },
+        watch: {
+            funPurview: function () {
+                var that = this
+                that.$nextTick(function () {
+                    addstyle()
+                    toggstyle()
+                    checkedyes()
+                });
+            },
+                rightmenu: function () {
+                    var that = this
+                    that.$nextTick(function () {
+                        addstyle()
+                        SEClist()
+                        checkedyes()
+
+
+                    });
+                }
+        }
+
+
+    })
+</script>
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<!--vue axios-->
+
+
+<script src="js/demo/form-validate-demo.js"></script>
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script>
+   
+        function addstyle() {
+            
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green'
+            });
+        }
+
+    
+</script>
+<script type="text/javascript">
+        //二级菜单点击
+        function SEClist(obj) {
+            var Slist=$(obj).nextAll('.lv2L1');
+            var THIlist=$(obj).nextAll('.lv2L1').children();
+            if (THIlist.is(":visible")) {
+                //alert("隐藏内容");
+                $(obj).attr("class", "fa fa-plus-circle");
+            } else {
+                //alert("显示内容");
+                $(obj).attr("class", "fa fa-minus-circle");
+
+            }
+            THIlist.slideToggle(500);
+        }
+
+        //一级菜单点击显示隐藏
+        function toggstyle() {
+            $(function () {
+                $("#lv1M").click(function () {
+
+                    if ($(".lv2U").is(":visible")) {
+
+                        $("#lv1M").attr("class", "fa fa-plus-circle");
+                    } else {
+
+                        $("#lv1M").attr("class", "fa fa-minus-circle");
+                    }
+                    $(".lv2U").slideToggle(300);
+                });
+
+
+            });
+
+        }
+        //选中逻辑
+        function checkedyes() {
+            $("#allCheck").on('ifChanged', function (event) {
+                console.log('按钮全选')
+                $("input[type=checkbox]").prop("checked", $("#allCheck").prop("checked"));
+                if ($("input[type='checkbox']")[0].checked) {
+                    $(".icheckbox_square-green").addClass("checked");
+                    $(".seleAll").prop("checked", true);
+                    $(".noAll").prop("checked", false);
+                    $(".seleAll").parents('.iradio_square-green').addClass('checked');
+                    $(".noAll").parents('.iradio_square-green').removeClass('checked');
+                } else {
+                    $(".icheckbox_square-green").removeClass("checked");
+                    $(".noAll").prop("checked", true);
+                    $(".seleAll").prop("checked", false);
+                    $(".noAll").parents('.iradio_square-green').addClass('checked');
+                    $(".seleAll").parents('.iradio_square-green').removeClass('checked');
+                }
+            });
+
+            $(".secondCheck1").on('ifChanged', function (event) {
+                console.log(2222)
+                //                console.log(this);
+                //                获取input列表
+                var THisCh=$(this).parent().next('.lv2L1').find('input');
+
+                var THisChS=$(this).parent().next('.lv2L1');
+                //
+                THisCh.prop("checked", $(this).prop("checked"));
+                if ($(this)[0].checked) {
+                    THisChS.find('.icheckbox_square-green').addClass("checked");
+                } else {
+                    THisChS.find('.icheckbox_square-green').removeClass("checked");
+                }
+            });
+
+
+        }
+
+//        function rightallsele(obj) {
+//            if($('#insparent').hasClass('checked')){
+//                $("input[name=lv3_1Check]").prop("checked", false);
+//            }else{
+//                $("input[name=lv3_1Check]").prop("checked", true);
+//            }
+//        }
+
+</script>
+
+</body>
+
+</html>

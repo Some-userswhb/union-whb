@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <!-- Morris -->
+    <link href="css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="css/combo.select.css" rel="stylesheet">
+    <link href="css/plugins/treeview/bootstrap-treeview.css" rel="stylesheet">
+    <link href="css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+</head>
+<body class="gray-bg sidebar-content">
+<style>
+    th, td {
+        text-align: center;
+    }
+
+    .dataTables-example td, .dataTables-example th {
+        padding: 8px 0 !important;
+    }
+    .selefile{
+        display: block;
+        border:none;
+        background-color: #fff;
+        float: left;
+    }
+    .selefiledele{
+        margin-top: 3px;
+        display: none;
+    }
+</style>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="euForm">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >标题：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" id ="title" type="text" v-model="title">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >内容：</label>
+                        <div class="col-sm-8">
+                            <textarea  class="form-control" type="text" v-model="content"  @input="descInput" id="content"  maxlength="500" ></textarea>
+                            <span class="numberV">{{txtVal}}/500</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >附件：</label>
+                        <div class="col-sm-8">
+                            <input name="file" type="file" @change="upload">
+                            <div style="margin-top:10px;" v-for="(item,key) in flieList">
+                                <label>{{ item.fileName }}</label>
+                                <span @click="deleteFile(item.fileId)" style="position:absolute;font-size:12px;color:rgb(0, 183, 146);margin-left:20px;">删除</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >通知日期：</label>
+                        <div class="col-sm-8">
+                            <input
+                                   v-model="noticeTime"  id="noticeTime"
+                                   onclick="laydate({istime: true, format: 'YYYY-MM-DD hh:mm:ss'})"
+                                   class="form-control " >
+                        </div>
+                    </div>
+                    <div class="form-group juzhong juzhong2">
+                        <label class="col-sm-3 control-label">*&nbsp;收件人：</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" placeholder="姓名/拼音/电话">
+                            <button type="button" @click="getUserData" class="btn glyphicon glyphicon-search" style="background:none"></button>
+                        </div>
+                    </div>
+                    <div class="form-group juzhong juzhong2">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-8">
+                            <h4 style="margin-bottom:20px">按组织架构选人</h4>
+                            <div>
+                                <div id="tree">
+                                    <ul id="lv1U">
+                                        <i class="fa fa-minus-circle" id="lv1M"></i>
+                                        <input type="checkbox" class="i-checks" name="" id="allCheck"/>
+                                        <li id="lv1L1">{{menuList.name}}
+                                            <ul class="lv2U" style="clear: left;"
+                                                v-for="(item,index) in menuList.children">
+                                                <i class="fa fa-minus-circle lv2M1"  style="clear: left;" onclick="SEClist(this)"></i>
+                                                <input type="checkbox" class="i-checks secondCheck1" name="">
+                                                <li class="lv2L1">{{item.name}}
+                                                    <ul class="lv3U1" style="clear: left;">
+                                                        <div class="listbox"
+                                                             v-for="(items,index) in item.children ">
+                                                            <input type="checkbox" name="lv3_1Check"
+                                                                   class="lv3Checks i-checks"/>
+                                                            <li>{{items.name}}</li>
+                                                        </div>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="radio i-checks col-sm-4">
+                                    <label>
+                                        <input type="radio" value="option1" name="a" class="seleAll"> <i></i>全选</label>
+                                </div>
+                                <div class="radio i-checks col-sm-4">
+                                    <label>
+                                        <input type="radio" checked="" value="option2" name="a" class="noAll"> <i></i>重置</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="button" class="btn btn-primary" @click="save" value="保存" style="width: 60px;">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/baseaddr.js"></script>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+
+<script src="js/plugins/layer/laydate/laydate.js"></script>
+
+<!--vue axios-->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script>
+    new Vue({
+        el:'#euForm',
+        data:{
+            flieList: [],
+            menuList:[],
+            txtVal: 0,
+            title:'',
+            content:'',
+            fileId:'',
+            noticeTime:'',
+            recipientAccount:'',
+            remark:''
+        },
+        methods:{
+            descInput(){
+                this.txtVal = this.content.length;
+            },
+           getUserData(){
+
+            },
+            save:function () {
+                var that = this
+                var fileConcent = "";
+                for (var i = 0; i < self.flieList.length; i++) {
+                    if(fileConcent === ""){
+                        fileConcent  = self.flieList[i].fileId;
+                    }else{
+                        fileConcent  = fileConcent+","+self.flieList[i].fileId;
+                    }
+                }
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: baseUrl + "/passLaborweb/api/laborun/message/add",
+                    data: Qs.stringify({
+                        "title":this.title,
+                        "content": $("#content").val(),
+                        "fileId":this.fileId,
+                        "noticeTime":this.noticeTime,
+                        "recipientAccount":this.recipientAccount,
+                        "remark":this.remark
+                    }),
+                }).then((res) => {
+                    if(res.data.msg === 'success'){
+                    layer.msg("添加成功", {icon: 1, time: 1000})
+                }else{
+                    layer.msg(res.data.msg, {icon: 2, time: 2000})
+                }
+            }).catch((err) => {
+                layer.msg("系统繁忙，请稍后再试", {icon: 2, time: 2000})
+            });
+            },
+            upload(e) {
+                var self = this;
+                let file = e.target.files[0];
+                var param = new FormData();
+                param.append('file', file, file.name);// 通过append向form对象添加数据
+                let config = {
+                    headers: {'Content-Type': 'multipart/form-data'}
+                };
+                axios.post(baseUrl + '/passLaborweb/api/laborun/file/upload', param, config)
+                    .then(res => {
+                        if (res.data.code === '0') {
+                            self.flieList.push(res.data.data)
+                            console.log(self.flieList)
+                            layer.msg("添加成功",{icon: 1, time: 1000})
+                        } else {
+                            layer.msg(res.data.msg,{icon: 2, time: 1000})
+                        }
+                    })
+            },
+            deleteFile(fileId) {
+                var self = this;
+                var param = Qs.stringify({
+                    fileId: fileId.toString()
+                });
+                let config = {
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                };
+                axios.post(baseUrl + '/passLaborweb/api/laborun/file/delete', param, config)
+                    .then(res => {
+                        var resultFileList = []
+                        if (res.data.code === '0') {
+                            for (var i = 0; i < self.flieList.length; i++) {
+                                if (self.flieList[i].fileId !== fileId.toString()) {
+                                    resultFileList.push(self.flieList[i])
+                                }
+                            }
+                            self.flieList = resultFileList;
+                            layer.msg("删除成功",{icon: 1, time: 1000})
+                        } else {
+                            layer.msg(res.data.msg,{icon: 2, time: 1000})
+                        }
+                    })
+            },
+        }
+    })
+</script>
+<script type="text/javascript">
+    function SEClist(obj) {
+        var Slist=$(obj).nextAll('.lv2L1');
+        var THIlist=$(obj).nextAll('.lv2L1').children();
+        if (THIlist.is(":visible")) {
+            //                      alert("隐藏内容");
+            $(obj).attr("class", "fa fa-plus-circle");
+        } else {
+            //                      alert("显示内容");
+            $(obj).attr("class", "fa fa-minus-circle");
+
+        }
+        THIlist.slideToggle(500);
+    }
+    $(function () {
+        setTimeout(function () {
+            $("#lv1M").click(function () {
+//                console.log($(".lv2U"));
+                if ($(".lv2U").is(":visible")) {
+                    //                      alert("隐藏内容");
+                    $("#lv1M").attr("class", "fa fa-plus-circle");
+                } else {
+                    //                      alert("显示内容");
+                    $("#lv1M").attr("class", "fa fa-minus-circle");
+                }
+                $(".lv2U").slideToggle(300);
+            });
+
+            $("#allCheck").on('ifChanged', function (event) {
+                $("input[type=checkbox]").prop("checked", $("#allCheck").prop("checked"));
+                if ($("input[type='checkbox']")[0].checked) {
+                    $(".icheckbox_square-green").addClass("checked");
+                    $(".seleAll").prop("checked", true);
+                    $(".noAll").prop("checked", false);
+                    $(".seleAll").parents('.iradio_square-green').addClass('checked');
+                    $(".noAll").parents('.iradio_square-green').removeClass('checked');
+//                    console.log($("input[type=radio]"));
+                } else {
+                    $(".icheckbox_square-green").removeClass("checked");
+                    $(".noAll").prop("checked", true);
+                    $(".seleAll").prop("checked", false);
+                    $(".noAll").parents('.iradio_square-green').addClass('checked');
+                    $(".seleAll").parents('.iradio_square-green').removeClass('checked');
+                }
+            });
+
+            $(".secondCheck1").on('ifChanged', function (event) {
+//                console.log(this);
+//                获取input列表
+                var THisCh=$(this).parent().next('.lv2L1').find('input');
+
+                var THisChS=$(this).parent().next('.lv2L1');
+//
+                THisCh.prop("checked", $(this).prop("checked"));
+                if ($(this)[0].checked) {
+                    THisChS.find('.icheckbox_square-green').addClass("checked");
+                } else {
+                    THisChS.find('.icheckbox_square-green').removeClass("checked");
+                }
+            });
+
+            $(".seleAll").on('ifChecked', function (event) {
+                $("input[type=checkbox]").prop("checked", true);
+                $(".icheckbox_square-green").addClass("checked");
+            });
+            $(".noAll").on('ifChecked', function (event) {
+                $("input[type=checkbox]").prop("checked", false);
+                $(".icheckbox_square-green").removeClass("checked");
+            });
+        }, 0)
+    });
+</script>
+</body>
+</html>

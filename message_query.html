@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .help-block.m-b-none {
+        display: inline;
+        margin-left: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .juzhong th, .juzhong2 td {
+        text-align: center;
+    }
+
+    ul {
+        display: block;
+        list-style: none;
+        cursor: pointer;
+    }
+
+    #lv3U2, #lv3U3 {
+        display: none;
+    }
+
+    .lv3U1, #lv3U2, #lv3U3 {
+        padding-left: 60px;
+    }
+
+    #tree, #lv1U {
+        overflow: hidden;
+    }
+
+    #tree i {
+        float: left;
+        font-size: 20px;
+        color: #ccc;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    #tree .listbox {
+        height: 35px;
+    }
+
+    .icheckbox_square-green {
+        float: left;
+    }
+
+    .lv3Checks {
+        display: block;
+        float: left;
+        clear: left;
+        width: 15px;
+        height: 15px;
+    }
+</style>
+<body>
+<div class="row" id="addtongzhi">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="signupForm">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">&nbsp;标题：</label>
+                        <div class="col-sm-8">
+                            <input id="title" name="title" class="form-control" v-model="message.title" type="text" readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">&nbsp;内容：</label>
+                        <div class="col-sm-8">
+                            <textarea  readonly="readonly" v-model="message.content" rows="3" cols="59"   style="width: 400px;height: 300px"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group juzhong">
+                        <label class="col-sm-3 control-label">&nbsp;附件：</label>
+                        <div style="margin-top:5px;" v-for="(item,key) in fileList">
+                            <p>
+                                <label>{{ item.fileName }}</label>
+                                <span @click="downloadFile(item.fileId,item.fileName)" style="position:absolute;font-size:12px;color:rgb(0, 183, 146);margin-left:20px;">下载</span>
+                            </p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#addtongzhi',
+        data: {
+            fileList:[],
+            id:'',
+            message:[],
+        },
+        methods: {
+            downloadFile(fileId,fileName) {
+                var aLink = document.createElement('a')
+                aLink.download = fileName
+                aLink.href = baseUrl + "/passLaborweb/api/laborun/file/downloadByFileId?fileId="+fileId
+                aLink.click()
+            },
+            queryMessage(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/message/query",
+                    data: JSON.stringify({
+                        "id": that.id,
+                    })
+                }).then((res) => {
+                    if (res.data.code === '0') {
+                        that.message = res.data.data
+                        that.fileList =  res.data.data.fileList
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 1500})
+                    }
+                });
+            }
+
+        },
+        mounted(){
+            var that = this;
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.id= decodeURIComponent(strs[0].split("=")[1]);
+            }
+            that.queryMessage()
+        }
+    })
+
+</script>
+
+
+</body>
+</html>
