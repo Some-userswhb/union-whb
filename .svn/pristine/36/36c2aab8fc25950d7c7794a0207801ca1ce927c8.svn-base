@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+    .help-block.m-b-none {
+        display: inline;
+        margin-left: 10px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+</style>
+<body class="gray-bg">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="transfer">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">添加要合并的工会：</label>
+                        <div class="col-sm-8">
+                            <input id="laborunCode" name="laborunCode" class="form-control"
+                                   type="text" v-model="laborunCode" placeholder="精确查询">
+                            <button class="btn btn-primary" type="button" @click="addUnion">添加</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">合并工会：</label>
+                        <div class="col-sm-8">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>工会名称</th>
+                                        <th>工会编号</th>
+                                        <th>职工人数</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="(item,index) in addmsg">
+                                            <td>{{item.laborunName}}</td>
+                                            <td>{{item.laborunCode}}</td>
+                                            <td>{{item.workers}}</td>
+                                            <td>
+                                                <i class="fa fa-home" @click="mainUnion(item.laborunName,item.laborunCode)"></i>
+                                                <i class="fa fa-trash" @click="deleteUnion(index)"></i>
+                                            </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 合并后工会主体名称：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" id='laborunName' name="laborunName" v-model="laborunName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 合并后工会主体编号：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" id='mergeLaborunCode' name="mergeLaborunCode" v-model="mergeLaborunCode" readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">合并后职工总人数：</label>
+                        <div class="col-sm-8">
+                            <input id="workers" name="workers" class="form-control"
+                                   type="text"  v-model="workers"
+                                    disabled>&nbsp; &nbsp;人
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">操作备注：</label>
+                        <div class="col-sm-8">
+                            <textarea id="remark" name="remark" class="form-control" style="resize: none" v-model="remark" placeholder="最多输入200字">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="保存">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<!-- 自定义js -->
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script>
+    var vm = new Vue({
+        el:'#transfer',
+        data:{
+            addmsg:[],
+            laborunCodeList:[],
+            laborunCode:'',
+            mergeLaborunCode:'',
+            workers:'',
+            remark:'',
+            laborunName:''
+        },
+        methods:{
+            getLaborList(){
+                var that = this
+                axios({
+                    method: 'get',
+                    url: baseUrl + "/passLaborweb/api/laborun/union/getLaborunList",
+                    data: {
+                        "laborunName": ''
+                    }
+                }).then(function (res) {
+                    that.laborunCodeList = res.data.data;
+                });
+            },
+            mainUnion:function(name,code){
+                var that = this
+                layer.confirm('确定要设置为主体工会吗', {
+                        skin : "my-skin",
+                        btn: ['确定', '取消']
+                    }, function () {
+                    that.laborunName=name;
+                    that.mergeLaborunCode = code;
+                    layer.close(layer.index)
+                 })
+            },
+            deleteUnion:function (index) {
+                var that = this
+                layer.confirm('确定要删除吗', {
+                        skin : "my-skin",
+                        btn: ['确定', '取消']
+                    }, function () {
+                    if(that.addmsg[index].laborunName ===that.laborunName){
+                        that.laborunName=''
+                    }
+                    that.addmsg.splice(index,1);
+                    that.workers=0
+                    that.addmsg.forEach(item => {
+                        that.workers = parseInt(that.workers)+parseInt(item.workers);
+                    });
+                    layer.close(layer.index)
+                })
+
+            },
+            addUnion:function () {
+                var that = this
+                var isAdd = true;
+                if(that.laborunCode===''){
+                    isAdd = false;
+                    layer.confirm("请输入工会编号进行添加", {icon: 2, btn :[ '确定' ]})
+
+                }
+                if(isAdd){
+                    that.addmsg.forEach(item => {
+                        if (item.laborunCode == that.laborunCode) {
+                            isAdd = false;
+                            layer.confirm("工会已添加，请不要重复添加", {icon: 2, btn :[ '确定' ]})
+                            return;
+                        }
+                    });
+                }
+                if(isAdd){
+                    axios({
+                        method: 'post',
+                        contentType:'x-www-form-urlencoded',
+                        url: baseUrl + "/passLaborweb/api/laborun/union/getSimpleLaborunList",
+                        data: Qs.stringify({
+                            "laborunCode":that.laborunCode
+                        })
+                    }).then((res) => {
+                        if (res.data.data === null || res.data.data.length === 0) {
+                            layer.msg("工会不存在", {icon: 2, time: 1000})
+                        } else {
+                            that.addmsg.push(res.data.data[0])
+                            that.workers=0
+                            that.addmsg.forEach(item => {
+                                that.workers = parseInt(that.workers)+parseInt(item.workers);
+                            });
+                        }
+                    });
+                }
+            },
+            merge:function () {
+                var that = this
+
+                if(that.addmsg.length===1){
+                    layer.confirm("请添加被合并的工会", {icon: 2, btn :[ '确定' ]})
+                }else{
+                    var laborunCodes = "";
+                    that.addmsg.forEach(item => {
+                        if(item.laborunCode !== that.mergeLaborunCode){
+                            if(laborunCodes ===''){
+                                laborunCodes = item.laborunCode;
+                            }else{
+                                laborunCodes = laborunCodes + "," + item.laborunCode;
+                            }
+                        }
+                    });
+                    axios({
+                        method: 'post',
+                        url: baseUrl + "/passLaborweb/api/laborun/union/merge",
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        contentType:'x-www-form-urlencoded',
+                        data:Qs.stringify({
+                            "laborunName":this.laborunName,
+                            "laborunCode":this.mergeLaborunCode,
+                            "workers":this.workers,
+                            "laborunCodes":laborunCodes,
+                            "remark":this.remark
+                        })
+                    }).then((res) => {
+                        if(res.data.code === '0'){
+                            layer.msg("合并成功", {icon: 1, time: 1000});
+                            setTimeout(function (){
+                                var index = parent.layer.getFrameIndex(window.name);
+                                parent.layer.close(index);
+                            }, 1000);
+                        }else{
+                            layer.msg(res.data.msg, {icon: 2, time: 2000})
+                        }
+                    }).catch(error => {
+                        layer.msg("服务器繁忙，请稍后再试", {icon: 2, time: 2000})
+                    })
+                }
+
+            }
+        },
+        mounted(){
+            this.getLaborList();
+
+        }
+    })
+
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#transfer").validate({
+            onsubmit:true,
+            success: "valid",
+            rules: {
+                laborunName: "required",
+                remark:{
+                    maxlength:200
+                },
+                mergeLaborunCode:"required"
+            },
+            messages: {
+                laborunName: icon + "请输入合并后工会主体名称",
+                remark:{
+                    maxlength:icon + "长度不大于200字"
+                },
+                mergeLaborunCode:"请设置合并主体工会"
+            },
+            submitHandler: function (form) {
+                vm.merge()
+            }
+        });
+    })
+</script>
+</body>
+
+</html>

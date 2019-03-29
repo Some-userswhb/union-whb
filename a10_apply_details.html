@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <!-- Morris -->
+    <link href="css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="css/combo.select.css" rel="stylesheet">
+    <link href="css/plugins/treeview/bootstrap-treeview.css" rel="stylesheet">
+    <link href="css/plugins/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+    <!-- Data Tables -->
+    <link href="css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+</head>
+<body class="gray-bg sidebar-content">
+<style>
+    .dataTables-example td, .dataTables-example th {
+        padding: 8px 0 !important;
+    }
+
+    #unionChange {
+        height: 500px;
+        overflow-y: scroll;
+        position: relative;
+    }
+
+    .file-add {
+        padding-top: 20px;
+    }
+
+    .butt-right {
+        width: 28%;
+    }
+
+    .file-operating li {
+        float: left;
+        margin-left: 5px;
+    }
+
+    [v-cloak] {
+        display: none;
+    }
+
+    .btn-group {
+        width: 210px;
+        height: 39px;
+        margin-bottom: 12px;
+    }
+
+    .btn-default.active.focus, .btn-default.active:focus,
+    .btn-default.active:hover, .btn-default:active.focus,
+    .btn-default:active:focus, .btn-default:active:hover,
+    .open > .dropdown-toggle.btn-default.focus, .open > .dropdown-toggle.btn-default:focus,
+    .open > .dropdown-toggle.btn-default:hover {
+        background-color: white;
+
+    }
+
+    .btn-default:hover, .btn-default:focus, .btn-default:active,
+    .btn-default.active, .open .dropdown-toggle.btn-default {
+        background-color: white;
+    }
+
+    .btn-default.active, .btn-default:focus, .btn-default:hover {
+        background-color: white;
+    }
+
+    .btn-group input {
+        width: 100%;
+        height: 40px;
+        background-color: white;
+        font-size: 12px !important;
+        text-align: left;
+        cursor: text;
+    }
+
+    .btn-group .dropdown-menu {
+        width: 210px;
+        height: 200px;
+        overflow: hidden;
+        overflow-y: scroll;
+        border-radius: 2px;
+    }
+
+    .btn-group .dropdown-menu li {
+        width: 100%;
+        height: 35px;
+        line-height: 35px;
+        padding-left: 10px;
+        border-bottom: 1px solid #e6e6e6;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .btn-group .dropdown-menu li:hover {
+        background-color: #1b6d85;
+        color: white;
+    }
+
+    .input-sm {
+        height: 40px !important;
+    }
+
+    .input-sm option {
+        width: 100%;
+        height: 40px !important;
+    }
+
+    .table-wrap {
+        width: 100%;
+        height: 500px;
+        overflow-y: auto;
+
+    }
+
+    .table-wrap::-webkit-scrollbar {
+        width: 3px;
+
+    }
+
+</style>
+<div id="treeGhlist" v-cloak>
+    <div class="ibox float-e-margins">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-content">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="tabs-container">
+                                    <table class="table table-striped table-hover no-bottom">
+                                                                <tbody>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        会员证号 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.memNumber}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        入会时间 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.addTime}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        所属工会 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.laborName}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        证件类型 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.cardTypeText}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        证件照片 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        <img style="width:100%;height:100%;"
+                                                                        v-bind:src="cardFrontPic"/>
+                                                                       </td>
+                                                                    <td class="no-top-border">
+                                                                        <img style="width:100%;height:100%;"
+                                                                     v-bind:src="cardReversePic" /></td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        姓名 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.memName}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        性别 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.memName}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        民族 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.nativePlace}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        出生日期 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.birthDate}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        证件号码 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.cardNo}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        联系电话 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.contactPhone}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        人像采集 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        <div class="col-sm-3">
+                                                                            <img style="width:100%;height:100%;z-index:1;"  v-bind:src="figure" />
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        政治面貌 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.politicsStatusText}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        文化程度 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.standaedCultureText}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        专业技能 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.professionalSkill}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        薪资 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.salary}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        会员状态:
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.memStatusText}}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="nback">
+                                                                    <td class="client-link no-top-border col-sm-3">
+                                                                        就业状态 :
+                                                                    </td>
+                                                                    <td class="no-top-border">
+                                                                        {{Detailslist.jobStatusText}}
+                                                                    </td>
+                                                                </tr>
+                                                                </tbody>
+                                                            </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<!--自定义js -->
+<script src="js/baseaddr.js"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<!--vue axios-->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<!-- layer javascript -->
+<script src="js/plugins/layer/layer.min.js"></script>
+<script>layer.config({skin: 'layui-layer-molv'})</script>
+<!-- jQuery UI -->
+<script src="js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- iCheck -->
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#treeGhlist",
+        data: {
+            Detailslist: [],
+            id: '',
+            cardFrontPic : '',
+            cardReversePic: '',
+            figure: '',
+            addr:'/file/images/'
+        },
+        methods: {
+            getA10Base: function () {
+                var that = this;
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun//a10ApplyInfo/query",
+                    data: JSON.stringify({
+                        "id": that.id
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if( res.data.data !==null){
+                            that.Detailslist = res.data.data;
+                            that.cardReversePic = that.addr + that.Detailslist.cardReversePic
+                            that.cardFrontPic = that.addr + that.Detailslist.cardFrontPic
+                            that.figure = that.addr + that.Detailslist.figure
+                        }
+                    }
+                });
+            }
+        },
+        mounted() {
+            var that = this;
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.id = decodeURIComponent(strs[0].split("=")[1]);
+            }
+            that.getA10Base();
+        },
+        computed: {}
+
+    });
+</script>
+
+
+
+</body>
+</html>

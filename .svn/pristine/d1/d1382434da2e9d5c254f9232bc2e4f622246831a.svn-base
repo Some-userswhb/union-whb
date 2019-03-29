@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .help-block.m-b-none {
+        display: inline;
+        margin-left: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .juzhong th, .juzhong2 td {
+        text-align: center;
+    }
+
+    ul {
+        display: block;
+        list-style: none;
+        cursor: pointer;
+    }
+
+    #lv3U2, #lv3U3 {
+        display: none;
+    }
+
+    .lv3U1, #lv3U2, #lv3U3 {
+        padding-left: 60px;
+    }
+
+    #tree, #lv1U {
+        overflow: hidden;
+    }
+
+    #tree i {
+        float: left;
+        font-size: 20px;
+        color: #ccc;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    #tree .listbox {
+        height: 35px;
+    }
+
+    .icheckbox_square-green {
+        float: left;
+    }
+
+    .lv3Checks {
+        display: block;
+        float: left;
+        clear: left;
+        width: 15px;
+        height: 15px;
+    }
+</style>
+<body>
+<div class="row" id="addtongzhi">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="signupForm">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;标题：</label>
+                        <div class="col-sm-8">
+                            <input id="title" name="title" class="form-control" type="text" aria-required="true"
+                                   placeholder="最多输入20个字符" aria-invalid="false" class="valid">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">*&nbsp;内容：</label>
+                        <div class="col-sm-8">
+                            <textarea name="content" id="content" rows="3" cols="59" style="resize: none;"  placeholder="请输入内容"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group juzhong">
+                        <label class="col-sm-3 control-label">*&nbsp;附件：</label>
+                        <div class="col-sm-8">
+                            <input name="file" type="file" id="excleFile" @change="upload">
+                            <div style="margin-top:10px;" v-for="(item,key) in flieList">
+                                <label>{{ item.fileName }}</label>
+                                <span @click="deleteFile(item.fileId)" style="position:absolute;font-size:12px;color:rgb(0, 183, 146);margin-left:20px;">删除</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group juzhong juzhong2">
+                        <label class="col-sm-3 control-label">*&nbsp;收件人：</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="recipient"  name="recipient" placeholder="姓名/拼音/手机">
+                            <button type="button" @click="getOrganList" class="btn glyphicon glyphicon-search" style="background:none"></button>
+                        </div>
+                    </div>
+                    <div class="form-group juzhong juzhong2">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-8">
+                            <h4 style="margin-bottom:20px">按组织架构选人</h4>
+                            <div>
+                                <div id="tree">
+                                    <ul id="lv1U" v-for="(paItem,index) in organList">
+                                        <i class="fa fa-minus-circle" id="lv1M"></i>
+                                        <input type="checkbox" :code="paItem.value" :pcode="paItem.value" :code2="paItem.name"  class="i-checks allCheck" name="oneCheck"/>
+                                        <li id="lv1L1" >{{paItem.name}}
+                                            <ul class="lv2U" style="clear: left;" v-for="(item,index) in paItem.children">
+                                                <i class="fa fa-minus-circle lv2M1"  style="clear: left;" onclick="towlist(this)"></i>
+                                                <input type="checkbox"  :code="item.value"  :pcode="paItem.value" :code2="item.name" class="i-checks secondCheck1" name="towCheck"/>
+                                                <li class="lv2L1">{{item.name}}
+                                                    <ul class="lv3U1" style="clear: left;">
+                                                        <div class="listbox"
+                                                             v-for="(items,index) in item.children ">
+                                                            <input type="checkbox" :code="items.value"  :pcode="item.value" :code2="items.name"  name="lv3_1Check"
+                                                                   class="lv3Checks i-checks"/>
+                                                            <li>{{items.name}}</li>
+                                                        </div>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div>
+                                <!--<div class="radio i-checks col-sm-4">
+                                    <label><input type="checkbox" value="option1" name="allButton" class="seleAll"> 全选</label>
+                                </div>
+                                <div class="radio i-checks col-sm-4">
+                                    <label><input type="checkbox" value="option2" name="resetButton" class="noAll">重置</label>
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <button class="btn btn-primary" type="submit">保存</button>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+
+<!-- 自定义js -->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#addtongzhi',
+        data: {
+            organList: [],
+            flieList:[]
+        },
+        methods: {
+            deleteFile(fileId) {
+                var self = this;
+                var param = Qs.stringify({
+                    fileId: fileId.toString()
+                });
+                let config = {
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                };
+                axios.post(baseUrl + '/passLaborweb/api/laborun/file/delete', param, config)
+                    .then(res => {
+                        var resultFileList = []
+                        if (res.data.code === '0') {
+                            for (var i = 0; i < self.flieList.length; i++) {
+                                if (self.flieList[i].fileId !== fileId.toString()) {
+                                    resultFileList.push(self.flieList[i])
+                                }
+                            }
+                            self.flieList = resultFileList;
+                            layer.msg("删除成功",{icon: 1, time: 1000})
+                        } else {
+                            layer.msg(res.data.msg,{icon: 2, time: 1000})
+                        }
+                    })
+            },
+            upload(e) {
+                var self = this;
+                let file = e.target.files[0];
+                var param = new FormData();
+                param.append('file', file, file.name);
+                let config = {
+                    headers: {'Content-Type': 'multipart/form-data'}
+                };
+                axios.post(baseUrl + '/passLaborweb/api/laborun/file/upload', param, config)
+                    .then(res => {
+                        if (res.data.code === '0') {
+                            self.flieList.push(res.data.data)
+                            console.log(self.flieList)
+                            layer.msg("添加成功",{icon: 1, time: 1000})
+                        } else {
+                            layer.msg(res.data.msg,{icon: 2, time: 1000})
+                        }
+                    })
+                $('input[id=excleFile]').val(null);
+            },
+            getOrganList(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunMem/getMemOranList",
+                    data: JSON.stringify({
+                        "keyName": $('#recipient').val(),
+                    })
+                }).then((res) => {
+                    if (res.data.code === '0') {
+                        that.organList =  res.data.data;
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 1000})
+                    }
+                });
+            },
+            saveMessage(){
+                var that = this
+                var self = this;
+                var fileConcent = "";
+                for (var i = 0; i < self.flieList.length; i++) {
+                    if(fileConcent === ""){
+                        fileConcent  = self.flieList[i].fileId;
+                    }else{
+                        fileConcent  = fileConcent+","+self.flieList[i].fileId;
+                    }
+                }
+                var recipient = ""
+                var recipientAccount=""
+                var checkboxlist = $("#lv1U input:checkbox")
+                if (checkboxlist !== undefined && checkboxlist.length > 0){
+                    for (var i = 0; i < checkboxlist.length; i++) {
+                        if ($(checkboxlist[i])[0].checked) {
+                            recipientAccount = $(checkboxlist[i])[0].attributes[1].nodeValue
+                            recipient = $(checkboxlist[i])[0].attributes[3].nodeValue
+                            break
+                        }
+                    }
+                }
+                axios({
+                    method: 'post',
+                    url: baseUrl + "/passLaborweb/api/laborun/message/add",
+                    contentType: 'x-www-form-urlencoded',
+                    data: Qs.stringify({
+                        "title": $('#title').val(),
+                        "content": $('#content').val(),
+                        "releasePeople": window.localStorage.getItem("labornUserName"),
+                        "releaseAccount":  window.localStorage.getItem("labornUserId"),
+                        "recipient": recipient,
+                        "recipientAccount": recipientAccount,
+                        "fileId": fileConcent
+
+                    })
+                }).then((res) => {
+                    if (res.data.code === '0') {
+                        layer.msg("添加成功", {icon: 1, time: 1000})
+                        setTimeout(function (){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 1000);
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 1000})
+                    }
+                })
+                    .catch(error => {
+                        layer.msg("服务器繁忙，请稍后再试", {icon: 2, time: 1000})
+                        console.log(error)
+                    })
+
+            }
+
+        },
+        mounted(){
+            var that = this;
+        },
+        watch: {
+            organList: function () {
+                var that = this
+                that.$nextTick(function () {
+                    addstyle()
+                    checkedyes()
+                });
+            }
+        }
+    })
+</script>
+
+<script>
+
+    function addstyle() {
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green'
+        });
+    }
+
+</script>
+<script type="text/javascript">
+    function towlist(obj) {
+        var THIlist=$(obj).nextAll('.lv2L1').children();
+        if (THIlist.is(":visible")) {
+            $(obj).attr("class", "fa fa-plus-circle");
+        } else {
+            $(obj).attr("class", "fa fa-minus-circle");
+        }
+        THIlist.slideToggle(500);
+    }
+
+    $("#lv1M").click(function () {
+        if ($(".lv2U").is(":visible")) {
+            $("#lv1M").attr("class", "fa fa-plus-circle");
+        } else {
+            $("#lv1M").attr("class", "fa fa-minus-circle");
+        }
+        $(".lv2U").slideToggle(300);
+    });
+
+    function checkedyes(data) {
+        /**
+         * 一级
+         */
+        $(".allCheck").on('ifChecked', function (event) {
+            var code = $(event.currentTarget)[0].attributes[1].nodeValue;
+            var option3 = $("input[name=towCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].checked){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+            option3 = $("input[name=lv3_1Check]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].checked){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+        });
+
+     /*   $(".allCheck").on('ifUnchecked', function (event) {
+            var code = $(event.currentTarget)[0].attributes[1].nodeValue;
+            //下级处理
+            var option3 = $("input[name=towCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].attributes[2].nodeValue === code){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+        });*/
+
+        $(".noAll").on('ifChecked', function (event) {
+            var option3 = $("input[name=oneCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    $(option3[i]).iCheck('uncheck')
+                }
+            }
+        });
+
+        $(".seleAll").on('ifChecked', function (event) {
+            var option3 = $("input[name=oneCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    $(option3[i]).iCheck('check')
+                }
+            }
+
+        });
+        /**
+         * 二级
+         */
+        $(".secondCheck1").on('ifChecked', function (event) {
+            /*var THisCh=$(this).parent().next('.lv2L1').find('input');
+            var THisChS=$(this).parent().next('.lv2L1');
+            THisCh.prop("checked", $(this).prop("checked"))
+            THisChS.find('.icheckbox_square-green').addClass("checked");*/
+            var option3 = $("input[name=oneCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].checked){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+            option3 = $("input[name=lv3_1Check]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].checked){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+
+        });
+
+       $(".secondCheck1").on('ifUnchecked', function (event) {
+        /*    var THisCh=$(this).parent().next('.lv2L1').find('input');
+
+            var THisChS=$(this).parent().next('.lv2L1');
+            //
+            THisCh.prop("checked", $(this).prop("checked"));
+            THisChS.find('.icheckbox_square-green').removeClass("checked");*/
+
+        });
+
+        /**
+         * 三级
+         */
+        $(".lv3Checks").on('ifChecked', function (event) {
+            var option3 = $("input[name=oneCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].checked){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+            option3 = $("input[name=towCheck]");
+            if(option3 !== undefined && option3.length !==0){
+                for(var i=0;i< option3.length;i++){
+                    if($(option3[i])[0].checked){
+                        $(option3[i]).iCheck('uncheck')
+                    }
+                }
+            }
+           /* var code = $(event.currentTarget)[0].attributes[1].nodeValue;
+            var pcode = $(event.target)[0].attributes[2].nodeValue;
+
+            var isParentCheck = true
+            var lv3List = $("input[name=lv3_1Check]");
+            var k = 0
+            var j = 0
+            if(lv3List !== undefined && lv3List.length !==0){
+                for(var i=0;i< lv3List.length;i++){
+                    if($(lv3List[i])[0].attributes[2].nodeValue === pcode){
+                        k++;
+                        if($(lv3List[i]).prop("checked")){
+                            j++
+                            isParentCheck = false
+                        }
+                    }
+                }
+            }
+            if( k !== 0 && k===j){
+                var towCheck = $("input[name=towCheck]");
+                if(towCheck !== undefined && towCheck.length !==0){
+                    for(var i=0;i< towCheck.length;i++){
+                        if($(towCheck[i])[0].attributes[1].nodeValue === pcode){
+                            $(towCheck[i]).iCheck('check')
+                        }
+                    }
+                }
+            }*/
+        });
+
+
+
+
+    }
+
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#signupForm").validate({
+            onsubmit:true,
+            success: "valid",
+            rules: {
+                title: "required",
+                content: "required"
+            },
+            messages: {
+                title: icon + "请输入标题",
+                content: icon + "请输入内容"
+            },
+            submitHandler: function (form) {
+                vm.saveMessage()
+            }
+        });
+    })
+</script>
+</body>
+
+</html>

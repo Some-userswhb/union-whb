@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+
+</style>
+<body>
+<div class="row" id="transfer">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <table class="table table-hover">
+                    <tr class="nback">
+                        <td class="client-link no-top-border col-sm-1">
+                            模板 :
+                        </td>
+                        <td class="no-top-border">
+                            <div style="margin-top:5px;" v-for="(item,key) in tempList">
+                                <p>
+                                    <label>{{ item.text }}</label>
+                                    <span @click="downloadFile(item.fileName)" style="position:absolute;font-size:12px;color:rgb(0, 183, 146);margin-left:20px;">下载</span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script src="js/demo/form-validate-demo.js"></script>
+<script>
+    var vm = new Vue({
+        el:'#transfer',
+        data:{
+           tempList:[{
+               text:'组织工会',
+               fileName:"组织和产业工会建会模板.xlsx"
+           },{
+               text:'产业工会',
+               fileName:"组织和产业工会建会模板.xlsx"
+           },{
+               text:'企事业工会',
+               fileName:"企事业工会建会模板.xlsx"
+           }]
+        },
+        methods:{
+            downloadFile(fileName){
+                window.location.href= baseUrl + "/passLaborweb/api/laborun/file/download?fileName=excel/"+fileName;
+            }
+        },
+        mounted(){
+
+
+        }
+    })
+</script>
+</body>
+</html>

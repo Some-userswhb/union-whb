@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+
+</style>
+<body class="gray-bg">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="euForm" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >所属工会：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id="laborunName" v-model="laborunCode" name="laborunName" disabled="disabled"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >上级部门：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id="parentOrganizationName" v-model="parentOrganizationName" disabled="disabled"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >部门名称：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="organization" name="organization">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >负责人：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="responsible" name="responsible">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >联系电话：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >邮箱：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="email" v-model="email" name="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >备注：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control"  style="resize: none;width: 50%" v-model="remark"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary"  value="保存" style="width: 60px;">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<!--vue axios-->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<!-- 自定义js -->
+<script src="js/baseaddr.js"></script>
+<!-- 自定义js -->
+<!--模糊搜索-->
+<script src="js/jquery.combo.select.js"></script>
+<!-- jQuery UI -->
+<script src="js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- iCheck -->
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script>
+   var vm =  new Vue({
+        el:'#euForm',
+        data:{
+            laborunCode:'',
+            parentOrganizationName:'',
+            organization:'',
+            responsible:'',
+            phone:'',
+            email:'',
+            remark:'',
+            id:''
+        },
+        mounted() {
+            var that = this
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.id= decodeURIComponent(strs[0].split("=")[1]);
+            }
+          that.getLaborunList();
+          that.getOrganizationList();
+          that.getOranDetail()
+        },
+        methods:{
+            editOrgan:function () {
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: baseUrl + "/passLaborweb/api/laborun/organization/update",
+                    data: Qs.stringify({
+                        "id" : that.id,
+                        //"laborunCode": $('#laborunName').val(),
+                        //"parentOrganizationCode": $('#parentOrganizationName').val(),
+                        "organization":this.organization,
+                        "responsible":this.responsible,
+                        "phone":this.phone,
+                        "email":this.email,
+                        "remark":this.remark
+                    }),
+                }).then((res) => {
+                    if(res.data.msg === 'success'){
+                        layer.msg("编辑成功", {icon: 1, time: 1000})
+                        setTimeout(function (){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 1000);
+                }else{
+                        layer.msg(res.data.msg, {icon: 2, time: 1000})
+                }
+            }).catch((err) => {
+                    layer.msg("编辑失败", {icon: 2, time: 1000})
+            });
+            },
+            getOrganizationList(){
+                axios({
+                    method: 'get',
+                    url: baseUrl + "/passLaborweb/api/laborun/organization/getOrganizationList",
+                    data: {
+                        "parentOrganizationName": ""
+                    }
+                }).then(function (res) {
+                    var stationEnum = "";
+                    $.each(res.data.data, function (index, item) {
+                        stationEnum += "<option value='" + item.value + "'>" + item.name + "</option>"
+                    })
+                    $('#parentOrganizationName').html(stationEnum)
+                });
+            },
+            getLaborunList(){
+                axios({
+                    method: 'get',
+                    url: baseUrl + "/passLaborweb/api/laborun/union/getLaborunList",
+                    data: {
+                        "laborunName": ""
+                    }
+                }).then(function (res) {
+                    var stationEnum = "";
+                    $.each(res.data.data, function (index, item) {
+                        stationEnum += "<option value='" + item.laborun_code + "'>" + item.laborun_name + "</option>"
+                    })
+                    $('#laborunName').html(stationEnum)
+                });
+            },
+            getOranDetail(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/organization/query",
+                    data: JSON.stringify({
+                        "id": that.id
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if (res.data.data.length !== 0) {
+                            that.laborunCode = res.data.data.laborunCode;
+                            that.parentOrganizationName = res.data.data.parentOrganizationName;
+                            that.organization = res.data.data.organization;
+                            that.responsible = res.data.data.responsible;
+                            that.phone = res.data.data.phone;
+                            that.email = res.data.data.email;
+                            that.remark = res.data.data.remark;
+                        }
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 1000})
+                    }
+
+                });
+            }
+
+        },
+    })
+
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#euForm").validate({
+            onsubmit:true,
+            success: "valid",
+            rules: {
+                laborunName: "required",
+                organization: "required",
+                responsible:{
+                    "required":true,
+                    maxlength:5,
+                },
+                phone: {
+                    "required":true,
+                    isMobile : true,
+                    minlength:11,
+                },
+                email: {
+                    "required":true
+                },
+
+
+            },
+            messages: {
+                laborunName: icon + "请选择所属工会",
+                organization: icon + "请输入部门名称",
+                responsible: {
+                    required: icon + "请输入负责人",
+                    maxlength : "不能大于5字符",
+
+                } ,
+                phone:{
+                    required :icon + "请选择负责人电话",
+                    minlength : "不能小于11个数字",
+                    isMobile : "请正确填写手机号码"
+                },
+                email:{
+                    required :icon + "请输入邮箱"
+                }
+
+            },
+            submitHandler: function (form) {
+                vm.editOrgan()
+            }
+        });
+    });
+</script>
+</body>
+</html>

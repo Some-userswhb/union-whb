@@ -1,0 +1,61 @@
+//以下为修改jQuery Validation插件兼容Bootstrap的方法，没有直接写在插件中是为了便于插件升级
+    $.validator.setDefaults({
+        highlight: function (element) {
+            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
+        },
+        success: function (element) {
+            element.closest('.form-group').removeClass('has-error').addClass('has-success');
+        },
+        errorElement: "span",
+        errorPlacement: function (error, element) {
+            if (element.is(":radio") || element.is(":checkbox")) {
+                error.appendTo(element.parent().parent().parent());
+            } else {
+                error.appendTo(element.parent());
+            }
+        },
+        errorClass: "help-block m-b-none",
+        validClass: "help-block m-b-none"
+    });
+
+    jQuery.validator.addMethod("isMobile", function(value, element) {
+        var length = value.length;
+        var mobile =/^1[3|4|5|7|8][0-9]{9}$/;
+        return this.optional(element) || (length == 11 && mobile.test(value));
+    });
+
+
+jQuery.validator.addMethod("positiveinteger", function(value, element) {
+    var aint=parseInt(value);
+    return aint>0 && (aint+"") == value;
+});
+
+
+jQuery.validator.addMethod("isChinaName", function(value, element) {
+    var pattern = /^[\u4E00-\u9FA5]{1,6}$/;
+    return pattern.test(value);
+});
+
+jQuery.validator.addMethod("isCardNo", function(value, element) {
+    var pattern = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+    return pattern.test(value);
+});
+
+
+jQuery.validator.addMethod("positiveinteger", function(value, element) {
+    var aint=parseInt(value);
+    return aint>0 && (aint+"") == value;
+});
+
+jQuery.validator.addMethod("minNumber",function(value, element){
+    var returnVal = true;
+    inputZ=value;
+    var ArrMen= inputZ.split(".");    //截取字符串
+    if(ArrMen.length==2){
+        if(ArrMen[1].length>2){    //判断小数点后面的字符串长度
+            returnVal = false;
+            return false;
+        }
+    }
+    return returnVal;
+},"小数点后最多为两位");         //验证错误信息
