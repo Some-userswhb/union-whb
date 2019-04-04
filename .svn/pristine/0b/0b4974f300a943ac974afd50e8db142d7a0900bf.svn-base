@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+</style>
+<body class="gray-bg">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="euForm" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>所属工会：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id="laborunName" name="laborunName" v-model="laborunName" @change="getLaborunClick"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>所属部门：</label>
+                        <div class="col-sm-8">
+                        <input class="form-control" type="text" v-model="organizationName" name="organizationName" v-if="!isOrGan" disabled="disabled">
+                        </div>
+                        <div class="col-sm-4 custom-tree-container">
+                            <el-tree v-if="isOrGan"
+                                    :data="organizations"
+                                    show-checkbox
+                                    node-key="id"
+                                     default-expand-all="true"
+                                    check-strictly
+                                    @check-change="handleClick"
+                                     :default-checked-keys="currentOrganId"
+                                    ref="treeForm"
+                                    @node-click="nodeClick">
+                            </el-tree>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>职务：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id='positionCode' name="positionCode" v-model="positionCode" @click="positionClick">
+                                <option v-for="item in positions" v-bind:value="item.value">{{item.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>姓名：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="realName" name="realName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>身份证号码：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="cardNo" name="cardNo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>职位状态：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id='posionStatus' v-model="posionStatus" name="posionStatus">
+                                <option v-for="item in posionStatuses" v-bind:value="item.value">{{item.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>手机：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>邮箱：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="email" v-model="email" name="email" aria-required="true">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >备注：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" style="resize: none;width: 50%" v-model="remark"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary"  value="保存" style="width: 60px;">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script>
+    var vm = new Vue({
+        el:'#euForm',
+        data:{
+            laborunCode:'',
+            organizationCode:'',
+            organizations:[],
+            organizationName:'无部门',
+            positions:[],
+            positionCode:'',
+            realName:'',
+            cardNo:'',
+            isOrGan:true,
+            posionStatus:1,
+            posionStatuses:[],
+            phone:'',
+            email:'',
+            remark:'',
+            currentOrganId:[],
+            id:''
+        },
+        methods:{
+            handleClick(data, checked, node){
+                if(checked == true){
+                    this.organizationCode = data.id;
+                    this.$refs.treeForm.setCheckedNodes([data]);
+                }
+            },
+            nodeClick(data,checked,node){
+                this.organizationCode = data.id
+                this.$refs.treeForm.setCheckedNodes([data]);
+            },
+            getMemInfo(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunMem/query",
+                    data: JSON.stringify({
+                        "id": this.id
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if (res.data.data.length !== 0) {
+                                that.laborunName= res.data.data.laborunCode;
+                                that.organizationCode = res.data.data.organizationCode;
+                                that.currentOrganId.push(res.data.data.organizationCode)
+                                that.organizationName =  res.data.data.organizationName;
+                                that.positionCode = res.data.data.positionId;
+                                that.realName = res.data.data.realName;
+                                that.cardNo = res.data.data.cardNo;
+                                that.posionStatus = res.data.data.posionStatus;
+                                that.phone = res.data.data.phone;
+                                that.email = res.data.data.email;
+                                that.remark = res.data.data.remark;
+                                that.getOrganList()
+                                that.getPositionList()
+
+                        }
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 1000})
+                    }
+
+                });
+            },
+            getSystemDictionary(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/systemDictionary/query",
+                    data: {
+                        "sn": "positionStatus"
+                    }
+                }).then(function (res) {
+                    if(res.data.code ==='0'){
+                        $.each(res.data.data, function (index, item) {
+                            if(item.positionStatus !== undefined){
+                                that.posionStatuses = item.positionStatus;
+                            }
+                        })
+                    }
+                });
+            },
+            getLaborun(){
+                var that = this
+                axios({
+                    method: 'get',
+                    url: baseUrl + "/passLaborweb/api/laborun/union/getLaborunList",
+                    data: {
+                        "laborunName": ""
+                    }
+                }).then(function (res) {
+                    var stationEnum = "";
+                    $.each(res.data.data, function (index, item) {
+                        stationEnum += "<option value='" + item.laborun_code + "'>" + item.laborun_name + "</option>"
+                    })
+                    $('#laborunName').html(stationEnum)
+                });
+            },
+            getLaborunClick(){
+                var that = this
+                that.getOrganList();
+                that.getPositionList();
+            },
+            getOrganList(){
+                var  that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/organization/getTree",
+                    data: JSON.stringify({
+                        "organization": "",
+                        "laborunCode":that.laborunName
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if(res.data.data ===null||res.data.data.length===0){
+                            layer.confirm("该工会不存在部门，请添加相关部门", {icon: 2, btn :[ '确定' ]})
+                            that.isOrGan = false
+                        }else{
+                            that.organizations = res.data.data;
+                            that.isOrGan = true
+                        }
+
+                    }
+                });
+            },
+            saveMem:function () {
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url:  baseUrl + "/passLaborweb/api/laborun/laborunMem/update",
+                    data: Qs.stringify({
+                        "id": that.id,
+                        "laborunCode":$('#laborunName').val(),
+                        "organizationCode":this.organizationCode,
+                        "positionId":this.positionCode,
+                        "realName": this.realName,
+                        "cardNo": this.cardNo,
+                        "posionStatus": this.posionStatus,
+                        "phone":this.phone,
+                        "email":this.email,
+                        "remark":this.remark
+                    }),
+                }).then((res) => {
+                    if(res.data.msg === 'success'){
+                        layer.msg('编辑成功', {icon: 1, time: 1000})
+                        setTimeout(function (){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 1000);
+                }else{
+                        layer.msg(res.data.msg, {icon: 2, time: 1500})
+                }
+            }).catch((err) => {
+                    layer.msg('添加失败', {icon: 2, time: 1500})
+            });
+            },
+            getPositionList(){
+                var  that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunPosition/getPositionList",
+                    data: Qs.stringify({
+                        "laborunCode": $('#laborunName').val()
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if( res.data.data ===null || res.data.data.length===0) {
+                            that.positions = [];
+                        }else{
+                            that.positions = res.data.data;
+                        }
+                    }
+                });
+            },
+            positionClick(){
+                var  that = this
+                if( that.positions ===null || that.positions.length===0){
+                    layer.confirm("工会不存在任何职位，请职位管理添加相关职位", {icon: 2, btn :[ '确定' ]})
+                }
+            }
+        },
+        mounted() {
+            var that = this
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.id= decodeURIComponent(strs[0].split("=")[1]);
+            }
+            that.getSystemDictionary();
+            that.getLaborun();
+            that.getMemInfo();
+        }
+    })
+
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#euForm").validate({
+            onsubmit:true,
+            success: "valid",
+            rules: {
+                laborunName: "required",
+                organizationCode: "required",
+                positionCode: "required",
+                realName:{
+                    "required":true,
+                    maxlength:5,
+                    isChinaName:true
+                },
+                cardNo:{
+                    "required":true,
+                    isCardNo:true
+                },
+                phone: {
+                    "required":true,
+                    isMobile : true,
+                    minlength:11,
+                },
+                email: {
+                    "required":true
+                },
+
+
+            },
+            messages: {
+                laborunName: icon + "请选择所属工会",
+                organizationCode: icon + "请选择所属部门",
+                positionCode: icon + "请选择职位",
+                realName: {
+                    required:icon + "请选输入姓名",
+                    maxlength : "不能大于5字符",
+                    isChinaName:"请输入正确的名字"
+                },
+                cardNo: {
+                    required:icon + "请选输入身份证号码",
+                    isCardNo:"请输入正确的身份证号码"
+                },
+                phone:{
+                    required :icon + "请输入手机",
+                    minlength : "不能小于11个数字",
+                    isMobile : "请正确填写手机号码"
+                },
+                email:{
+                    required :icon + "请输入邮箱"
+                }
+
+            },
+            submitHandler: function (form) {
+                vm.saveMem()
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>

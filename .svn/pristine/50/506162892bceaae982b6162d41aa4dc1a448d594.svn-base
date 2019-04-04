@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <link href="css/plugins/iCheck/custom.css" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+
+
+    .flo-left{
+           position: relative;
+            line-height: 35px;
+            float: left;
+            width: 100px;
+          }
+     input[type="checkbox"]{
+             width: 20px;
+             height: 20px;
+             opacity: 0;
+             float: left;
+     }
+
+    .roles label {
+              position: absolute;
+              left: 5px;
+              top: 8px;
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              border: 1px solid #999;
+            }
+
+    /*设置选中的input的样式*/
+     /* + 是兄弟选择器,获取选中后的label元素*/
+     input:checked+label {
+             background-color: #006eb2;
+             border: 1px solid #006eb2;
+     }
+
+     input:checked+label::after {
+             position: absolute;
+              content: "";
+              width: 5px;
+              height: 10px;
+              top: 3px;
+              left: 6px;
+              border: 2px solid #fff;
+              border-top: none;
+              border-left: none;
+            transform: rotate(45deg)
+     }
+
+</style>
+<body class="gray-bg">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="euForm" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>所属工会：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="laborunName" name="laborunName" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>所属部门：</label>
+                        <div class="col-sm-8">
+                        <input class="form-control" type="text" v-model="organizationName" name="organizationName" >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>姓名：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="realName" name="realName" >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>分配角色：</label>
+                        <div class="col-sm-8 roles">
+                            <div class="flo-left">
+                                 <input id="item1" type="checkbox" name="item" value="水果" checked>
+                                 <label for="item1"></label>
+                                 <span style="margin-left: 10px">A角色</span>
+                           </div>
+                           <div class="flo-left">
+                               <input id="item2" type="checkbox" name="item" value="饮料">
+                               <label for="item2"></label>
+                               <span style="margin-left: 10px"> B角色</span>
+                          </div>
+                            <div class="flo-left">
+                                <input id="item3" type="checkbox" name="item" value="饮料">
+                                <label for="item3"></label>
+                                <span style="margin-left: 10px">C角色</span>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="text" class="btn btn-primary"  value="确定" style="width: 60px;">
+
+                        </div>
+                    </div>
+
+
+
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script src="js/plugins/iCheck/icheck.min.js"></script>
+<script>
+    var vm = new Vue({
+        el:'#euForm',
+        data:{
+            laborunName:'',
+            organizationCode:'',
+            organizationName:'无部门',
+            positionName:'',
+            realName:'',
+            cardNo:'',
+            posionStatusText:'',
+            phone:'',
+            email:'',
+            remark:'',
+            id:''
+        },
+        methods:{
+            getMemInfo(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunMem/query",
+                    data: JSON.stringify({
+                        "id": this.id
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if (res.data.data.length !== 0) {
+                                that.laborunName= res.data.data.laborunName;
+                                that.organizationCode = res.data.data.organizationCode;
+                                that.organizationName =  res.data.data.organizationName;
+                                that.positionName = res.data.data.positionName;
+                                that.realName = res.data.data.realName;
+                                that.cardNo = res.data.data.cardNo;
+                                that.posionStatusText = res.data.data.posionStatusText;
+                                that.phone = res.data.data.phone;
+                                that.email = res.data.data.email;
+                                that.remark = res.data.data.remark;
+                        }
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 1000})
+                    }
+
+                });
+            }
+        },
+        mounted() {
+            var that = this
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.id= decodeURIComponent(strs[0].split("=")[1]);
+            }
+            that.getMemInfo();
+        }
+    })
+</script>
+
+
+</body>
+</html>

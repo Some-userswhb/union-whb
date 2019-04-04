@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+
+</style>
+<body class="gray-bg">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="euForm" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>所属工会：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id="laborunName" name="laborunName" @change="getLaborunClick"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >上级部门：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="parentOrganizationName" name="parentOrganizationName" v-if="!isOrGan" disabled="disabled">
+                        </div>
+                        <div class="col-sm-4 custom-tree-container">
+                            <el-tree v-if="isOrGan"
+                                     :data="organizations"
+                                     show-checkbox
+                                     node-key="id"
+                                     check-strictly
+                                     default-expand-all="true"
+                                     @check-change="handleClick"
+                                     ref="treeForm"
+                                     @node-click="nodeClick">
+                            </el-tree>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>部门名称：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="organization" name="organization">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>负责人：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="responsible" name="responsible">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>联系电话：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="text" v-model="phone" name="phone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" ><span style="color: red;">*</span>邮箱：</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="email" required="" v-model="email" name="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >备注：</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" style="resize: none;width: 50%" v-model="remark" name="remark"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary"  :disabled="isDisable" value="保存" style="width: 60px;">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/plugins/jeditable/jquery.jeditable.js"></script>
+<script src="js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<!--vue axios-->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+
+
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- 自定义js -->
+<script src="js/baseaddr.js"></script>
+<!-- 自定义js -->
+<!--模糊搜索-->
+<script src="js/jquery.combo.select.js"></script>
+<!-- jQuery UI -->
+<script src="js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- iCheck -->
+<script src="js/plugins/iCheck/icheck.min.js">
+</script><script src="js/plugins/iCheck/icheck.min.js"></script>
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script>
+    var vm = new Vue({
+        el:'#euForm',
+        data:{
+            laborunCode:'',
+            parentOrganizationCode:'',
+            parentOrganizationName:'',
+            organization:'',
+            organizations:[],
+            responsible:'',
+            phone:'',
+            email:'',
+            isDisable:false,
+            isOrGan:false,
+            remark:''
+        },
+        mounted() {
+            var that = this
+            that.getLaborunList();
+            that.getOrganList();
+        },
+        methods:{
+            getLaborunClick(){
+                var that = this
+                that.getOrganList();
+            },
+            handleClick(data, checked, node){
+                if(checked == true){
+                    this.parentOrganizationCode = data.id;
+                    this.$refs.treeForm.setCheckedNodes([data]);
+                }
+            },
+            nodeClick(data,checked,node){
+                this.parentOrganizationCode = data.id
+                this.$refs.treeForm.setCheckedNodes([data]);
+            },
+            getLaborunList(){
+                var that = this
+                axios({
+                    method: 'get',
+                    url: baseUrl + "/passLaborweb/api/laborun/union/getLaborunList",
+                    data: {
+                        "laborunName": ""
+                    }
+                }).then(function (res) {
+                    var stationEnum = "";
+                    $.each(res.data.data, function (index, item) {
+                        stationEnum += "<option value='" + item.laborun_code + "'>" + item.laborun_name + "</option>"
+                    })
+                    $('#laborunName').html(stationEnum)
+                    that.getOrganList()
+
+                });
+            },
+            getOrganList(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/organization/getTree",
+                    data: JSON.stringify({
+                        "organization": "",
+                        "laborunCode":$('#laborunName').val()
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if(res.data.data ===null||res.data.data.length===0){
+                            that.parentOrganizationName = "无部门数据"
+                            that.isOrGan = false
+                        }else{
+                            that.organizations = res.data.data;
+                            that.isOrGan=true
+                        }
+                    }
+                });
+            },
+            saveOrgan:function () {
+                var that = this
+                that.isDisable = true
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: baseUrl + "/passLaborweb/api/laborun/organization/add",
+                    data: Qs.stringify({
+                        "laborunCode": $('#laborunName').val(),
+                        "parentOrganizationCode": this.parentOrganizationCode,
+                        "organization":this.organization,
+                        "responsible":this.responsible,
+                        "phone":this.phone,
+                        "email":this.email,
+                        "remark":this.remark
+                    }),
+                }).then((res) => {
+                    that.isDisable = false
+                    if(res.data.code === '0'){
+                        layer.msg("添加成功", {icon: 1, time: 1000})
+                        setTimeout(function (){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 1000);
+                }else{
+                    layer.msg(res.data.msg, {icon: 2, time: 2000})
+                }
+            }).catch((err) => {
+                that.isDisable = false
+                 layer.msg("添加失败", {icon: 2, time: 2000})
+            });
+            }
+        },
+    })
+
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#euForm").validate({
+            onsubmit:true,
+            success: "valid",
+            rules: {
+                laborunName: "required",
+                organization: "required",
+                responsible:{
+                    "required":true,
+                    maxlength:5,
+                },
+                phone: {
+                    "required":true,
+                    isMobile : true,
+                    minlength:11,
+                },
+                email: {
+                    "required":true
+                }
+            },
+            messages: {
+                laborunName: icon + "请选择所属工会",
+                organization: icon + "请输入部门名称",
+                responsible: {
+                    required: icon + "请输入负责人",
+                    maxlength : "不能大于5字符",
+
+                } ,
+                phone:{
+                    required :icon + "请选择负责人电话",
+                    minlength : "不能小于11个数字",
+                    isMobile : "请正确填写手机号码"
+                },
+                email:{
+                    required :icon + "请输入邮箱"
+                }
+
+            },
+            submitHandler: function (form) {
+                vm.saveOrgan()
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

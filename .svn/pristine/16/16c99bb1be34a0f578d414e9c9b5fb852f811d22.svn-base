@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+    .valid select{
+        width: 116px;
+        height: 30px;
+        margin-right: 30px;
+        float: left;
+        border-radius: 10px;
+        padding-left: 10px;
+        outline: none;
+        border-color: #ccc;
+    }
+    .paperwork select{
+        width: 116px;
+        height: 30px;
+        margin-left: 29px;
+        float: left;
+        border-radius: 10px;
+        padding-left: 10px;
+        outline: none;
+        border-color: #ccc;
+    }
+
+</style>
+<body>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="legalAdd" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span>工会名称：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id='laborunName' name="laborunName" v-model="laborunName">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span>统一社会信用代码：</label>
+                        <div class="col-sm-8">
+                            <input id="socialCreditCode" name="socialCreditCode" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span>法定代表人：</label>
+                        <div class="col-sm-8">
+                            <input id="representative" name="representative" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">住所：</label>
+                        <div class="col-sm-8">
+                            <input id="residence" name="residence" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">发证机关：</label>
+                        <div class="col-sm-8">
+                            <input id="licenseAgencies" name="licenseAgencies" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">有效期：</label>
+                        <div class="col-sm-8 valid" style="width: 50%">
+                            <span style="float: left;line-height: 30px;margin-right: 15px;">至</span>
+                             <select v-model="year" >
+                                <option v-for="year in validYear">{{year.year}}</option>
+                            </select>
+                            <select v-model="month" @click = "getValiDate">
+                                <option v-for="month in validMonth">{{month.month}}</option>
+                            </select>
+                            <select v-model="date">
+                                <option v-for="item in validDate">{{item.date}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >发证日期：</label>
+                        <div class="col-sm-8 paperwork" style="width: 50%">
+                            <select v-model="disyear">
+                                <option v-for="year in validYear" :value="year.year">{{year.year}}</option>
+                            </select>
+                            <select v-model="dismonth" @click ="getDisDate">
+                                <option v-for="month in validMonth" :value="month.month">{{month.month}}</option>
+                            </select>
+                            <select v-model="disdate">
+                                <option v-for="item in disDate" :value="item.date">{{item.date}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="保存">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script src="js/demo/form-validate-demo.js"></script>
+<script src="js/plugins/layer/laydate/laydate.js"></script>
+
+<script>
+    var vm = new Vue({
+        el: '#legalAdd',
+        data: {
+            addmsg: [],
+            office: '',
+            activities: '',
+            otherPlace:'',
+            fixedCapital:'',
+            workingCapital:'',
+            effectiveDate:'2030-12-01',
+            releaseDate:'2019-12-01',
+            otherCapital:'',
+            laborunName:'',
+            //有效期
+            validYear:[],
+            validMonth:[],
+            validDate:[],
+            year:'2030',
+            month:'12',
+            date:'1',
+
+            //发证日期
+            disDate:[],
+            disyear:'2019',
+            dismonth:'12',
+            disdate:'1'
+
+        },
+        methods: {
+            getDutyName: function () {
+                    var that = this;
+                    if($('#laborunName').val()===null || $('#laborunName').val()===''){
+                        layer.confirm("请先选择所属工会", {icon: 2, btn :[ '确定' ]})
+                        return ;
+                    }else{
+                        if(that.addmsg.length === 1){
+                            layer.confirm("工会法人已添加，请删除之后再添加", {icon: 2, btn :[ '确定' ]})
+                            return ;
+                        }else{
+                            axios({
+                                method: 'post',
+                                headers: {'Content-Type': 'application/json'},
+                                url: baseUrl + "/passLaborweb/api/laborun/laborunDuty/queryRecord",
+                                data: JSON.stringify({
+                                    "laborunCode": $('#laborunName').val(),
+                                    "dutyType": $('#dutyName').val()
+                                })
+                            }).then((res) => {
+                                if (res.data.code === '0') {
+                                    if (res.data.data === null || res.data.data.length === 0) {
+                                        layer.msg("该工会职务未任职，请先任职", {icon: 2, time: 2000})
+                                    } else {
+                                        that.addmsg.push(res.data.data[0])
+                                        console.log( that.addmsg)
+                                    }
+                                } else {
+                                    layer.msg(res.data.msg, {icon: 2, time: 2000})
+                                }
+                            });
+                        }
+                    }
+            },
+            saveLegal: function () {
+                var that = this
+                var effectiveDate = year+"-"+month+"-"+date;
+                var releaseDate = disyear+"-"+dismonth+"-"+disdate;
+                axios({
+                    method: 'post',
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunLegal/add",
+                    contentType: 'x-www-form-urlencoded',
+                    data: Qs.stringify({
+                        "laborunCode": $('#laborunName').val(),
+                        "socialCreditCode": $('#socialCreditCode').val(),
+                        "representative": $('#representative').val(),
+                        "residence": $('#residence').val(),
+                        "licenseAgencies": $('#licenseAgencies').val(),
+                        "effectiveDate": effectiveDate,
+                        "releaseDate": releaseDate
+                        /*"memNumber": that.addmsg[0].memNumber,
+                        "dutyType": $('#dutyName').val(),
+                        "lastYearBalance": $('#lastYearBalance').val(),
+                        "annualMemsFee": $('#annualMemsFee').val(),
+                        "annualFunds": $('#annualFunds').val(),
+                        "otherIncome": $('#otherIncome').val(),
+                        "fixedCapital": $('#fixedCapital').val(),
+                        "workingCapital": $('#workingCapital').val(),
+                        "otherCapital": $('#otherCapital').val(),
+                        "office": $('#office').val(),
+                        "activities": $('#activities').val(),
+                        "otherPlace": $('#otherPlace').val(),
+                        "civilLiability": $('#civilLiability').val()*/
+                    })
+                }).then((res) => {
+                    if (res.data.code === '0') {
+                        layer.msg("添加成功", {icon: 1, time: 1000})
+                        setTimeout(function (){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 1000);
+                    } else {
+                        layer.msg(res.data.msg, {icon: 2, time: 2000})
+                    }
+                })
+                    .catch(error => {
+                        layer.msg("服务器繁忙，请稍后再试", {icon: 2, time: 2000})
+                        console.log(error)
+                    })
+
+            },
+            deleteLegal(){
+                var that  = this
+                that.addmsg = [];
+            },
+            //时间 逻辑
+            validTime(){
+                var that = this;
+                var date = new Date;
+                //设置年份
+                for(var i = 1990; i<=2099 ;i++){
+                    that.validYear.push({'year':+i})
+                }
+                //设置月份
+                var month = date.getMonth() +1;
+                for(var i = 1; i<=12;i++){
+                    if(i < 10){
+                        that.validMonth.push({'month':+("0"+i)})
+                    }else{
+                        that.validMonth.push({'month':+i})
+                    }
+                }
+                that.getValiDate()
+                that.getDisDate()
+
+            },
+            getValiDate(){
+                var that = this
+                var dateSum;
+                if(that.month == 1 || that.month == 3 || that.month == 5|| that.month == 7||that.month == 8||that.month == 10||that.month == 12){
+                    dateSum = 31
+                }else if(that.month == 2){
+                    dateSum = 28
+                }else if(that.month == 4 || that.month == 6||that.month == 9||that.month == 11){
+                    dateSum =  30
+                }
+                for(var i=1;i<=dateSum;i++){
+                    if(i<10){
+                        that.validDate.push({'date':+("0"+i)})
+                    }else{
+                        that.validDate.push({'date':+i})
+                    }
+                }
+            },
+            getDisDate(){
+                var that = this
+                var dateSum;
+                if(that.dismonth == 1 || that.dismonth == 3 || that.dismonth == 5|| that.dismonth == 7||that.dismonth == 8||that.dismonth == 10||that.dismonth == 12){
+                    dateSum = 31
+                }else if(that.dismonth == 2){
+                    dateSum = 28
+                }else if(that.dismonth == 4 || that.dismonth == 6||that.dismonth == 9||that.dismonth == 11){
+                    dateSum =  30
+                }
+                for(var i=1;i<=dateSum;i++){
+                    if(i<10){
+                        that.disDate.push({'date':+("0"+i)})
+                    }else{
+                        that.disDate.push({'date':+i})
+                    }
+                }
+            }
+
+        },
+        mounted() {
+            var that  = this
+
+
+            var url = location.search; //获取url中"?"符后的字串
+            var theRequest = new Object();
+            axios({
+                method: 'get',
+                url: baseUrl + "/passLaborweb/api/laborun/union/getLaborunList",
+                data: {
+                    "laborunName": ""
+                }
+            }).then(function (res) {
+                var stationEnum = "<option value=''>请选择</option>";
+                $.each(res.data.data, function (index, item) {
+                    stationEnum += "<option value='" + item.laborun_code + "'>" + item.laborun_name + "</option>"
+                })
+                $('#laborunName').html(stationEnum)
+                if (url.indexOf("?") != -1) {
+                    var str = url.substr(1);
+                    strs = str.split("&");
+                    that.laborunName= decodeURIComponent(strs[0].split("=")[1]);
+                    if(that.laborunName !==undefined && that.laborunName !==null){
+                        $('#laborunName').attr("disabled","disabled");
+                    }
+                }
+
+            });
+           /* if(that.addmsg.length ===0){
+                that.getDutyName();
+            }*/
+
+            that.validTime();
+
+
+        },
+        computed: {
+            officeSum: function () {
+              /*  var office = this.office=== ''? 0 : parseInt(this.office);
+                var activities = this.activities=== ''? 0 : parseInt(this.activities);
+                var otherPlace = this.otherPlace=== ''? 0 : parseInt(this.otherPlace);*/
+                if( this.office=== ''&& this.activities=== ''&&  this.otherPlace=== ''){
+                    return ''
+                }else{
+                    return parseFloat(this.office+this.activities+this.otherPlace).toFixed(2)
+
+                }
+            },
+            capitalSum: function () {
+              /*  return this.fixedCapital=== ''? parseFloat(0):parseFloat(this.fixedCapital)
+                    + this.workingCapital ===''? parseFloat(0):parseFloat(this.workingCapital)
+                    + this.otherCapital ==='' ? parseFloat(0): parseFloat(this.otherCapital);*/
+                if( this.fixedCapital=== ''&& this.workingCapital=== ''&&  this.otherCapital=== ''){
+                    return ''
+                }else{
+                    return parseFloat(this.fixedCapital + this.workingCapital + this.otherCapital).toFixed(2)
+
+                }
+            }
+        }
+    })
+</script>
+<script>
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#legalAdd").validate({
+            onsubmit:true,
+            success: "valid",
+            rules: {
+                laborunName: {
+                    "required":true
+                },
+                socialCreditCode: "required",
+                representative: "required",
+                lastYearBalance: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                annualMemsFee: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                annualFunds: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                otherIncome: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                fixedCapital: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                workingCapital: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                otherCapital: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                office: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                activities: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                otherPlace: {
+                    number: true,
+                    minNumber:true,
+                    min:0
+                },
+                civilLiability: {
+                    maxlength:500
+                }
+            },
+            messages: {
+                laborunName: {
+                    "required": icon + "请选择所属工会"
+                },
+                socialCreditCode: icon + "请输入统一社会信用代码",
+                representative: {
+                    "required":icon + "请输入法定代表人"
+                },
+                lastYearBalance: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                annualMemsFee: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                annualFunds: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                otherIncome: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                fixedCapital: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                workingCapital: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                otherCapital:{
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                office: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                activities: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                otherPlace: {
+                    number: icon + "请输入数字",
+                    minNumber: icon + "输入数字最多小数点后两位",
+                    min: icon + "请输入大于0的数值"
+                },
+                civilLiability: {
+                    maxlength: icon + "请输入500字以内"
+                }
+            },
+            submitHandler: function (form) {
+                vm.saveLegal()
+            }
+        });
+    })
+
+
+</script>
+</body>
+
+</html>
