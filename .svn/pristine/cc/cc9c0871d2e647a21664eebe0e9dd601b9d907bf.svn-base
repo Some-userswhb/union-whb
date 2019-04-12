@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添智·智慧工会云服务平台</title>
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <!-- Data Tables -->
+    <link href="css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">
+
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <style>
+        .fontSmall{
+            float: left;
+            width: 60%;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .martop{
+            margin-top: 16px;
+        }
+
+    </style>
+</head>
+
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" id="indexVue" v-cloak>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title ourclour">
+                    <h5><i class="fa fa-gears"></i>&nbsp;工会管理</h5>
+                </div>
+                <div class="ibox-content clear shadow" >
+                    <div class="col-sm-2 no-padding wid135" v-for="item in permsMenus">
+                        <div :class="item.bgcolor">
+                            <a href="#" @click="systemMenuOpen(item.url,item.code)" target="_blank" class=“J_menuItem”>
+                                <div class="showbox">
+                                    <i :class="item.icon"></i>
+                                    <p>{{item.name}}</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title ourclour">
+                    <h5><i class="fa fa-volume-up"></i> 通知&nbsp;<span>{{messgeNum}}</span></h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link ourclour"  @click="getMoreMessage">查看更多<i class="fa fa-angle-double-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content clear shadow">
+                    <ul class="no-padding notice" v-for="item in messages">
+                        <li>
+                            <a href="#" class="clear" @click="getMessageDetail(item.id)">
+                                <span v-if = "item.isRead >= '1'" ><i class="fa fa-square pull-left martop"></i></span>
+                                <span v-else ><i class="fa fa-square pull-left ourclour martop"></i></span>
+                                <span class="fontSmall">{{item.title}}</span>
+                                <span class="dateli pull-right">{{item.noticeTime}}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6" id="daiban">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title ourclour">
+                    <h5><i class="fa fa-pencil-square-o"></i> 待办&nbsp;<span>{{todoNum}}</span></h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link ourclour" @click="getMoretodoInfo">查看更多<i class="fa fa-angle-double-right"></i></a>
+                    </div>
+                </div>
+                <div class="ibox-content clear shadow">
+                    <ul class="no-padding notice" v-for="item in todoInfos">
+                        <li>
+                            <a href="#" class="clear" @click="moretodoDetail(item.id,item.todoType)">
+                                <span v-if = "item.isRead >= '1'" ><i class="fa fa-square pull-left martop"></i></span>
+                                <span v-else ><i class="fa fa-square pull-left ourclour martop"></i></span>
+                                <span class="fontSmall ">{{item.title}}</span>
+                                <span class="dateli pull-right">{{item.createTime}}</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/plugins/jeditable/jquery.jeditable.js"></script>
+<!-- Data Tables -->
+<script src="js/plugins/dataTables/jquery.dataTables.js"></script>
+<script src="js/plugins/dataTables/dataTables.bootstrap.js"></script>
+<!--vue axios-->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<script src="js/baseaddr.js"></script>
+<!--模糊搜索-->
+<script src="js/jquery.combo.select.js"></script>
+<!-- jQuery UI -->
+<script src="js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=9051096" charset="UTF-8"></script>
+<script>layer.config({skin: 'my-skin'})</script>
+
+
+
+<script>
+    var vm = new Vue({
+        el: "#indexVue",
+        data: {
+            messages: [],
+            todoInfos:[],
+            permsMenus:[],
+            buttonPerm:null,
+            systemCode:'',
+            messgeNum:'',
+            todoNum:''
+        },
+        mounted() {
+            var that = this;
+            that.systemCode = window.localStorage.getItem("labornsystemCode");
+            that.getMessage();
+            that.getTodoInfo(),
+            that.getPermMenus(),
+            that.getMessageNum(),
+            that.getTodoNum()
+        },
+        methods: {
+            getMessageNum(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/message/getReadNum",
+                    data: JSON.stringify({
+                        "userId":  window.localStorage.getItem("labornUserId")
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if(res.data.data !==null){
+                            that.messgeNum = res.data.data;
+                        }
+                    }
+                });
+            },
+            getTodoNum(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunTodoInfo/getReadNum",
+                    data: JSON.stringify({
+                        "userId":  window.localStorage.getItem("labornUserId")
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if(res.data.data !==null){
+                            that.todoNum = res.data.data;
+                        }
+                    }
+                });
+            },
+            getMessageDetail(id){
+                var that = this
+                layer.open({
+                    type: 2,
+                    title: '通知详情',
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: 'message_query.html?id=' + id,
+                    end: function(){
+                        that.getMessageNum()
+                        that.getMessage()
+                    }
+                })
+
+            },
+            moretodoDetail(id,todoType){
+                var that = this
+
+               if (todoType === '1') {
+                   layer.open({
+                       type: 2,
+                       title: '',
+                       shadeClose: true,
+                       area: ['100%', '100%'],
+                       content: 'union_apply_audit.html?id='+id,
+                       end: function(){
+                           that.getTodoNum()
+                           that.getTodoInfo()
+                       }
+                   })
+
+               }else if(todoType === '2'){
+                   layer.open({
+                       type: 2,
+                       title: '',
+                       shadeClose: true,
+                       area: ['100%', '100%'],
+                       content: 'legal_apply_audit.html?id='+id,
+                       end: function(){
+                           that.getTodoNum()
+                           that.getTodoInfo()
+                       }
+                   })
+
+               }else if(todoType === '3'){
+                   layer.open({
+                       type: 2,
+                       title: '',
+                       shadeClose: true,
+                       area: ['100%', '100%'],
+                       content: 'a10_apply_new.html?id='+id,
+                       end: function(){
+                           that.getTodoNum()
+                           that.getTodoInfo()
+                       }
+                   })
+
+               }else if(todoType === '4'){
+                   layer.open({
+                       type: 2,
+                       title: '',
+                       shadeClose: true,
+                       area: ['100%', '100%'],
+                       content: 'a10_apply_transfer.html?id='+id,
+                       end: function(){
+                           that.getTodoNum()
+                           that.getTodoInfo()
+                       }
+                   })
+               }else if(todoType === '5'){
+                   layer.open({
+                       type: 2,
+                       title: '',
+                       shadeClose: true,
+                       area: ['100%', '100%'],
+                       content: 'union_apply.html?id='+id,
+                       end: function(){
+                           that.getTodoNum()
+                           that.getTodoInfo()
+                       }
+                   })
+               }
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunTodoReadinfo/add",
+                    data: JSON.stringify({
+                        "todoInfoId": id,
+                        "userId": window.localStorage.getItem("labornUserId")
+                    })
+                }).then((res) => {
+                    if (res.data.code === '0') {
+                       console.log("查看成功")
+                    }
+                });
+            },
+            getMessage(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/message/getHomeMessagePage",
+                    data: JSON.stringify({
+                        "size": 5,
+                        "page": 1,
+                        "userId":  window.localStorage.getItem("labornUserId")
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if(res.data.data.content.length >0){
+                            that.messages = res.data.data.content;
+                        }
+                    }
+                });
+            },
+            getMoreMessage(){
+                layer.open({
+                    type: 2,
+                    title: '',
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: 'index_more_message.html'
+                })
+            },
+            getTodoInfo(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunTodoInfo/queryPage",
+                    data: JSON.stringify({
+                        "size": 5,
+                        "page": 1,
+                        "userId":  window.localStorage.getItem("labornUserId")
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        if(res.data.data.content.length >0){
+                            that.todoInfos = res.data.data.content;
+                        }
+                    }
+                });
+            },
+            getMoretodoInfo(){
+                layer.open({
+                    type: 2,
+                    title: '',
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: 'index_more_todo.html'
+                })
+            },
+            getPermMenus(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: userUrl + "/sso/ssoResource/getchildSysResource",
+                    data: Qs.stringify({
+                        "code": window.localStorage.getItem("labornsystemCode")
+                    })
+                }).then(function (res) {
+                    if(res.data.code === '0'){
+                        that.permsMenus = res.data.data.chilSystemList;
+                        if(res.data.data.buttonPerm !== undefined){
+                            that.buttonPerm =  res.data.data.buttonPerm
+                            window.localStorage.setItem('buttonPerm', that.buttonPerm);
+                            console.log(sessionStorage.getItem("buttonPerm"))
+                        }
+                    }
+                });
+            },
+            systemMenuOpen(url,code){
+                parent.vm.systemMenuOpen(url,code,true)
+            }
+        }
+    });
+</script>
+<script>
+
+</script>
+</body>
+
+</html>

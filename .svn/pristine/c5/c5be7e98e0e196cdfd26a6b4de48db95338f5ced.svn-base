@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns:v-bind="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+</style>
+<body class="gray-bg">
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="signupForm" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">上级工会：</label>
+                        <div class="col-sm-8">
+                            <input id="parentLaborunName" name="parentLaborunName" class="form-control"  disabled="disabled"
+                                   type="text"  v-model="Detailslist.parentLaborunName"  readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工会分类：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control"  id="laborunKind" v-model="Detailslist.laborunKind">
+                                <optgroup label="省级工会">
+                                    <option :value="1" >省级直属产业工会</option>
+                                    <option :value="2" >省级直属工会</option>
+                                    <option :value="3" >省直机关工会工作委员会</option>
+                                </optgroup>
+                                <optgroup label="市级工会">
+                                    <option :value="4" >市级直属产业工会</option>
+                                    <option :value="5" >市级直属工会</option>
+                                    <option :value="6" >市直机关工会工作委员会</option>
+                                </optgroup>
+                                <optgroup label="县区工会">
+                                    <option :value="7" >县直机关工会工作委员会</option>
+                                </optgroup>
+                                <optgroup label="乡镇工会">
+                                    <option :value="8" >乡镇公有制工会</option>
+                                    <option :value="9" >乡镇非公工会</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工会级别：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control"  id="laborunLevel" v-model="Detailslist.laborunLevel"  disabled="disabled">
+                                <option v-for="item in laborunLevels" v-bind:value="item.value">{{item.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工会类型：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control"  id="laborunType" v-model="Detailslist.laborunType">
+                                <option v-for="item in laborunTypes" v-bind:value="item.value">{{item.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" >工会名称：</label>
+                        <div class="col-sm-8">
+                            <input id="laborunName" name="laborunName" class="form-control" type="text"
+                                   v-model="Detailslist.laborunName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工会编号：</label>
+                        <div class="col-sm-8">
+                            <input id="laborunCode" name="laborunCode" v-model="Detailslist.laborunCode"
+                                   class="form-control" type="text" onkeyup="this.value=this.value.replace(/[^\w_]/g,'');">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label ">建会时间：</label>
+                        <div class="col-sm-8">
+                            <input id="establishTime" name="establishTime" class="laydate-icon form-control layer-date"
+                                   type="text" v-model="Detailslist.establishTime"
+                                   onclick="laydate({istime: true, format: 'YYYY-MM-DD hh:mm:ss',max:maxDate()})"
+                            >
+                        </div>
+                    </div>
+                    <div class="form-group" id="xingzheng-fater">
+                        <label class="col-sm-3 control-label" >行政区划：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control"  style="width: 12.2%" id="pAdministratCode" v-model="pAdministratCode">
+                                <option value="140000">山西省</option>
+                            </select>
+                            <select class="form-control" style="width: 12.2%"  id="cityAdministratCode" v-model="cityAdministratCode" @change="cityAdminChange">
+                                <option value="" >选择市级</option>
+                                <option v-for="item in cityAdministratCodes" v-bind:value="item.value" >{{item.name}}</option>
+                            </select>
+                            <select class="form-control" style="width: 12.2%" v-model="couAdministratCode" @click="couAdminChange">
+                                <option value="" >选择区县级</option>
+                                <option v-for="item in couAdministratCodes" v-bind:value="item.value"  >{{item.name}}</option>
+                            </select>
+                            <select class="form-control" style="width: 12.2%">
+                                <option value="" >选择乡镇级</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工会地址：</label>
+                        <div class="col-sm-8">
+                            <input id="laborunAddr" name="laborunAddr" v-model="Detailslist.laborunAddr" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">单位类型：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id="unitType" v-model="Detailslist.unitType">
+                                <option v-for="item in unitTypes" v-bind:value="item.value">{{item.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">社会保险缴纳：</label>
+                        <div class="col-sm-8">
+                            <select class="form-control" id='isTax' name="isTax" v-model="Detailslist.isTax">
+                                <option value="1">是</option>
+                                <option value="0">否</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">负责人：</label>
+                        <div class="col-sm-8">
+                            <input id="principal" name="principal" class="form-control" type="text" aria-required="true" v-model="Detailslist.principal"  class="error">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">负责人电话：</label>
+                        <div class="col-sm-8">
+                            <input id="principalPhone" name="principalPhone"  v-model="Detailslist.principalPhone" class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">职工人数：</label>
+                        <div class="col-sm-8">
+                            <input id="workers" name="workers"  v-model="Detailslist.workers" class="form-control" type="text" >&nbsp;&nbsp;&nbsp;人
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">工会备注：</label>
+                        <div class="col-sm-8">
+                            <textarea id="remark" name="remark" class="form-control"  style="resize: none" v-model="Detailslist.remark"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="保存"  :disabled="isDisable" style="width: 60px;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+<script src="js/plugins/layer/laydate/laydate.js"></script>
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+
+<!--vue axios-->
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<script src="js/baseaddr.js"></script>
+
+<script>
+    //    请求工会详情信息
+    var unionDetails = new Vue({
+        el: "#signupForm",
+        data: {
+            Detailslist: {},
+            laborunKinds:[],
+            laborunLevels:[],
+            laborunTypes:[],
+            administratCodes:[],
+            unitTypes:[],
+            buildWays:[],
+            Scode:'',
+            isDisable:false,
+            pAdministratCode:'140000',
+            cityAdministratCode:'',
+            couAdministratCode:'',
+            cityAdministratCodes:[],
+            couAdministratCodes:[]
+        },
+        mounted() {
+            var that = this;
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.Scode= decodeURIComponent(strs[0].split("=")[1]);
+            }
+            this.getLaborList();
+            this.getSystemDictionary();
+        },
+        methods:{
+            cityAdminChange(){
+                this.couAdministratCode="";
+                this.getlaborunAdministrat(3,this.cityAdministratCode,2,0);
+            },
+            couAdminChange(){
+                if(this.couAdministratCodes.length ===0){
+                    if(this.cityAdministratCode =''){
+                        layer.msg("请先选择上级", {icon: 1, time: 2000})
+                    }else{
+                        this.getlaborunAdministrat(3,this.cityAdministratCode,2);
+                    }
+                }
+            },
+            getlaborunAdministrat(level,adminiParentCode,type,initType){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunAdministrat/getAdminstratList",
+                    data: {
+                        "adminiParentCode":adminiParentCode,
+                        "level":level
+                    }
+                }).then(function (res) {
+                    if(res.data.code ==='0'){
+                        if(type===1){
+                            that.cityAdministratCodes = res.data.data;
+                        }else{
+                            that.couAdministratCodes = res.data.data;
+                            if(initType===1){
+                                that.couAdministratCode = that.Detailslist.administratCode;
+                            }
+                        }
+                    }
+                });
+            },
+            getLaborList(){
+                var that = this
+                that.getlaborunAdministrat(2,'',1)
+                axios({
+                    method: 'post',
+                    url: baseUrl + "/passLaborweb/api/laborun/union/query",
+                    data: {
+                        "laborunCode":that.Scode
+                    }
+                }).then(function (data) {
+                    that.Detailslist = data.data.data;
+                    that.getlaborunAdministrat(2,'',1);
+
+                    if(that.Detailslist.administratCode !==that.pAdministratCode) {
+                        if(that.pAdministratCode=== that.Detailslist.parentAdministratCode){
+                            that.cityAdministratCode = that.Detailslist.administratCode;
+                        }else {
+                            that.cityAdministratCode = that.Detailslist.parentAdministratCode;
+                            that.getlaborunAdministrat(3, that.cityAdministratCode, 2,1)
+                        }
+                    }
+                });
+             },
+            getSystemDictionary(){
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl+"/passLaborweb/api/laborun/systemDictionary/query",
+                    data: {
+                        "sn": "laborunKind,laborunLevel,laborunType,unitBuildWay,unitType"
+                    }
+                }).then(function (res) {
+                    if(res.data.code ==='0'){
+                        $.each(res.data.data, function (index, item) {
+                            if(item.laborunKind !== undefined){
+                                that.laborunKinds = item.laborunKind;
+                            }
+                            if(item.laborunLevel !== undefined){
+                                that.laborunLevels = item.laborunLevel;
+                            }
+                            if(item.laborunType !== undefined){
+                                that.laborunTypes = item.laborunType;
+                            }
+                            if(item.unitBuildWay !== undefined){
+                                that.buildWays = item.unitBuildWay;
+                            }
+                            if(item.unitType !== undefined){
+                                that.unitTypes = item.unitType;
+                            }
+                        })
+                    }
+                });
+            },
+            edit:function () {
+                var that = this;
+                if(that.couAdministratCode ==='' && that.cityAdministratCode ===''){
+                    that.Detailslist.administratCode = that.pAdministratCode
+                }else if(that.couAdministratCode ==='' && that.cityAdministratCode !==''){
+                    that.Detailslist.administratCode = this.cityAdministratCode
+                }else if(that.couAdministratCode!==''){
+                    that.Detailslist.administratCode = this.couAdministratCode
+                }
+                that.isDisable = true
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: baseUrl + "/passLaborweb/api/laborun/union/update",
+                    data: Qs.stringify({
+                        "id":that.Detailslist.id,
+                        "laborunLevel":that.Detailslist.laborunLevel,
+                        "laborunName":that.Detailslist.laborunName,
+                        "laborunCode":that.Detailslist.laborunCode,
+                        "laborunKind":that.Detailslist.laborunKind,
+                        "laborunType":that.Detailslist.laborunType,
+                        "administratCode":that.Detailslist.administratCode,
+                        "establishTime":that.Detailslist.establishTime,
+                        "laborunAddr":that.Detailslist.laborunAddr,
+                        "unitType":that.Detailslist.unitType,
+                        "isTax":that.Detailslist.isTax,
+                        "principal":that.Detailslist.principal,
+                        "workers":that.Detailslist.workers,
+                        "principalPhone":that.Detailslist.principalPhone,
+                        "remark":that.Detailslist.remark
+                    }),
+                }).then((res) => {
+                    that.isDisable = false
+                    if(res.data.code === '0'){
+                        layer.msg("编辑成功", {icon: 1, time: 1000})
+                        setTimeout(function (){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }, 1000);
+                    }else{
+                        layer.msg(res.data.msg, {icon: 2, time: 3000})
+                    }
+                })
+            }
+        }
+    });
+
+    $().ready(function () {
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#signupForm").validate({
+            onsubmit:true,
+
+            rules: {
+                laborunName: "required",
+                laborunCode: "required",
+                establishTime: "required",
+                administratCode: "required",
+                laborunAddr: "required",
+                principal: "required",
+                principalPhone: {
+                    "required":true,
+                    isMobile : true,
+                    minlength:11
+                },
+                workers: {
+                    "required":true,
+                    positiveinteger:true
+                }
+            },
+            messages: {
+                laborunName: icon + "请输入工会名称",
+                laborunCode: icon + "请输入工会编号",
+                establishTime: icon + "请选择建会时间",
+                administratCode:icon + "请选择行政区划",
+                laborunAddr:icon + "请选择工会地址",
+                principal:icon + "请选择负责人",
+                principalPhone:{
+                    required :icon + "请选择负责人电话",
+                    minlength : "不能小于11个数字",
+                    isMobile : "请正确填写手机号码"
+                },
+                workers:{
+                    required: icon + "请输入职工人数",
+                    positiveinteger:"请输入整数"
+                }
+            },
+            submitHandler: function (form) {
+                unionDetails.edit()
+            }
+        });
+    })
+</script>
+<script>
+    function maxDate(){
+        var now = new Date();
+        return now.getFullYear()+"-" + (now.getMonth()+1) + "-" + now.getDate();
+    }
+</script>
+
+</body>
+
+</html>

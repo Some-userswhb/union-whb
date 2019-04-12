@@ -1,6 +1,6 @@
 //var baseUrl="http://127.0.0.1:5001";
 //var userUrl="http://127.0.0.1:8010";
-var baseUrl="http://112.35.92.177:90";
+var baseUrl="http://112.35.92.177:9090";
 var userUrl="http://112.35.92.177:90";
 var lang = {
     "sProcessing": "处理中...",

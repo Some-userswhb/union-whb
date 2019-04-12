@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html"/>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+    <style>
+        .fontSmall {
+            float: left;
+            width: 60%;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .martop {
+            margin-top: 16px;
+        }
+        .dropdown{
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden">
+<div id="wrapper" v-cloak>
+    <!--左侧导航开始-->
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="nav-close"><i class="fa fa-times-circle"></i>
+        </div>
+        <div class="sidebar-collapse">
+            <ul class="nav" id="side-menu">
+                <li class="nav-header">
+                    <div class="dropdown profile-element">
+                        <span><img alt="image" class="img-circle" src="img/profile_small.jpg"/></span>
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#"><span class="clear">
+                               <span class="block m-t-xs"><strong class="font-bold">{{userName}}</strong></span>
+                               <span class="text-muted text-xs block">{{roleName}}<b class="caret"></b></span></span>
+                        </a>
+                 <!-- <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                            <li><a class="J_menuItem" href="form_avatar.html">修改头像</a>
+                            </li>
+                            <li><a class="J_menuItem" href="profile.html">个人资料</a>
+                            </li>
+                            <li><a class="J_menuItem" href="contacts.html">联系我们</a>
+                            </li>
+                            <li><a class="J_menuItem" href="mailbox.html">信箱</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li><a href="login.html">安全退出</a>
+                            </li>
+                        </ul>-->
+                    </div>
+                    <div class="logo-element">
+                    </div>
+                </li>
+               <!-- <li v-for="item in myMenus">
+                    <a @click="systemMenuCom(item,false)" class="J_menuItem">{{item.name}}</a>
+                    <ul class="nav nav-second-level">
+                        <li v-for="child in item.children">
+                           &lt;!&ndash; <a  :href="child.componentUrl" @click="systemMenuOpen($event,child.componentUrl,child.code, false)" class="J_menuItem">{{child.name}}</a>&ndash;&gt;
+                            <a   class="J_menuItem" :href="child.componentUrl">{{child.name}}</a>
+                        </li>
+                    </ul>
+                </li>-->
+
+                <li v-for="(item,index) in myMenus" :key="index">
+                    <a @click="systemMenuCom(item,false)" class="J_menuItem" :href="item.componentUrl === ''? (item.children.length > 0 ? item.children[0].componentUrl : '') : item.componentUrl" :data-code="item.code">
+                        <i :class="item.image"></i>
+                        <span class="nav-label">{{item.name}}</span>
+                        <span v-if="item.children !== undefined && item.children.length >0 " class="fa arrow"></span>
+                    </a>
+                    <ul class="nav nav-second-level">
+                        <li v-for="(items,name) in item.children">
+                            <a class="J_menuItem" data-code="items.code" :href="items.componentUrl">{{items.name}}</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!--左侧导航结束-->
+    <!--右侧部分开始-->
+    <div id="page-wrapper" class="gray-bg dashbard-1">
+        <div class="row border-bottom">
+            <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <img src="img/gh.png" style="height: 40px;margin:10px;float: left;"/>
+                    <h1 style="font-size: 20px; color: #ab0e0f; font-weight: bold;">添智·智慧工会云服务平台</h1>
+                </div>
+                <ul class="nav navbar-top-links navbar-right">
+                    <li class="dropdown">管理切换</li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                            <i class="fa fa-bell"></i> <span class="label label-primary"></span>
+                        </a>
+                    </li>
+                    <li class="dropdown" @click="updatePwd">修改密码</li>
+                </ul>
+            </nav>
+        </div>
+        <div class="row content-tabs">
+            <button class="roll-nav roll-left J_tabLeft"><i class="fa fa-backward"></i></button>
+            <nav class="page-tabs J_menuTabs">
+                <div class="page-tabs-content" >
+                    <a  @click="firstOpen(this)" class="J_menuTab active" data-id="indexf.html">首页</a>
+                </div>
+            </nav>
+            <button class="roll-nav roll-right J_tabRight"><i class="fa fa-forward"></i>
+            </button>
+            <div class="btn-group roll-nav roll-right">
+                <button class="dropdown J_tabClose" data-toggle="dropdown">关闭操作<span class="caret"></span>
+
+                </button>
+                <ul role="menu" class="dropdown-menu dropdown-menu-right">
+                    <li class="J_tabCloseAll"><a>关闭全部选项卡</a>
+                    </li>
+                    <li class="J_tabCloseOther"><a>关闭其他选项卡</a>
+                    </li>
+                </ul>
+            </div>
+            <div @click="loginOut" class="roll-nav roll-right J_tabExit"><i class="fa fa fa-sign-out"></i> 退出</div>
+        </div>
+       <!-- <div class="row J_mainContent" id="content-main">
+
+            &lt;!&ndash;<iframe class="J_iframe" name="iframe0" width="100%" height="100%" src="" frameborder="0" data-id="" seamless></iframe>&ndash;&gt;
+            <iframe class="J_iframe" name="iframe0" id="iframeWrap" style="height: 100%;" seamless></iframe>
+
+        </div>-->
+        <div class="row J_mainContent" id="content-main">
+            <iframe class="J_iframe" name="iframe0" width="100%" height="100%" src="indexf.html" frameborder="0"
+                    data-id="indexf.html" seamless></iframe>
+        </div>
+        <div class="footer">
+            <div class="pull-right">&copy; 2013-2019 <a href="" target="_blank">山西普罗迪克科技有限公司</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+
+<script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+
+<script src="js/hplus.js?v=4.1.0"></script>
+<script type="text/javascript" src="js/contabs.js"></script>
+
+<script src="js/plugins/pace/pace.min.js"></script>
+<script src="js/common.js"></script>
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+
+<!-- 自定义js -->
+<script src="js/baseaddr.js"></script>
+<script>layer.config({skin: 'my-skin'})</script>
+
+
+<script>
+    var vm = new Vue({
+        el: "#wrapper",
+        data: {
+            permsMenus: [],
+            myMenus: [],
+            firstMenu: {},
+            messages: [],
+            todoInfos: [],
+            systemCode: '',
+            firstHtml: "indexf.html",
+            roleName: '',
+            userName: '',
+            url:''
+        },
+        mounted() {
+            var that = this;
+            var url = location.search; //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.systemCode = decodeURIComponent(strs[0].split("=")[1])
+            }
+            that.getLoginUserInfo()
+        },
+        methods: {
+            firstOpen() {
+                var that = this
+                that.getMyselfPerms()
+                $("#content-main").html('<iframe  height="100%" src="indexf.html" width="100%" id="iframe-icon"></iframe>')
+            },
+            getLoginUserInfo() {
+                var that = this
+                axios({
+                    method: 'get',
+                    url: userUrl + "/sso/ssoUser/getLoginUserInfo",
+                    data: {
+                    }
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if(res.data.data !==''){
+                            that.roleName = res.data.data.roleName
+                            that.userName = res.data.data.userName
+                            //that.systemCode = res.data.data.systemCode
+                            window.localStorage.setItem("labornsystemCode",that.systemCode)
+                            window.localStorage.setItem("labornUserName",that.userName)
+                            window.localStorage.setItem("labornUserId",res.data.data.userId)
+                            var laborunCode = res.data.data.laborunCode;
+                            if(res.data.data.laborunCode ===undefined || res.data.data.laborunCode ===null){
+                                laborunCode='';
+                            }
+                            window.localStorage.setItem("laborunCode",laborunCode)
+
+                            if (that.systemCode === '') {
+                                layer.msg("请联系系统管理员,配置系统", {icon: 2, time: 2000})
+                                window.location.href = "login.html"
+                            } else {
+                                that.getMyselfPerms();
+                                that.getMessage();
+                                that.getTodoInfo();
+                                that.firstMenu = {
+                                    name: '首页',
+                                    componentUrl: that.firstHtml,
+                                    url: that.firstHtml,
+                                    code: that.systemCode
+                                }
+                                $("#content-main").html('<iframe  height="100%" src="indexf.html" width="100%" id="iframe-icon"></iframe>')
+                            }
+                        }else{
+                            //window.location.href = "login.html?systemCode=" + that.systemCode
+                        }
+                    }
+                });
+               /*that.systemCode = 'S1003'
+                that.getPermMenus();
+                that.getMyselfPerms();
+                that.getMessage();
+                that.getTodoInfo();
+                that.firstMenu = {
+                    name: '首页',
+                    componentUrl: that.firstHtml,
+                    url: that.firstHtml,
+                    code: that.systemCode
+                }
+                $("#content-main").html('<iframe  height="100%" src="indexf.html" width="100%" id="iframe-icon"></iframe>')*/
+            },
+            getMyselfPerms() {
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: userUrl + "/sso/ssoResource/get/resource",
+                    data: Qs.stringify({
+                        "systemCode": that.systemCode
+                    })
+                }).then(function (res) {
+                    that.myMenus = []
+                    that.myMenus.push(that.firstMenu)
+                    if (res.data.code === '0') {
+                        if (res.data.data.resources.length > 0) {
+                            that.myMenus = that.myMenus.concat(res.data.data.resources)
+                        }
+                    }
+                });
+            },
+            getMyfPerms(code) {
+                var that = this
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: userUrl + "/sso/ssoResource/get/resource",
+                    data: Qs.stringify({
+                        "systemCode": code
+                    })
+                }).then(function (res) {
+                    that.myMenus = []
+                    that.myMenus.push(that.firstMenu)
+                    if (res.data.code === '0') {
+                        if (res.data.data.resources.length > 0) {
+                            that.myMenus = that.myMenus.concat(res.data.data.resources)
+                        }
+                    }
+                });
+
+
+            },
+            getMessage() {
+                var that = this;
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/message/getHomeMessagePage",
+                    data: JSON.stringify({
+                        "size": 5,
+                        "page": 1
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if (res.data.data.content.length > 0) {
+                            that.messages = res.data.data.content;
+                        }
+                    }
+                });
+            },
+            updatePwd(){
+                layer.open({
+                    type: 2,
+                    title: '修改密码',
+                    shadeClose: true,
+                    area: ['80%', '80%'],
+                    content: 'password_edit.html',
+                    end: function () {
+                    }
+                })
+            },
+            getMoreMessage() {
+                layer.open({
+                    type: 2,
+                    title: '',
+                    shadeClose: true,
+                    area: ['50%', '80%'],
+                    content: 'index_more_message.html'
+                })
+            },
+            getTodoInfo() {
+                var that = this;
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun/laborunTodoInfo/queryPage",
+                    data: JSON.stringify({
+                        "size": 5,
+                        "page": 1
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if (res.data.data.content.length > 0) {
+                            that.todoInfos = res.data.data.content;
+                        }
+                    }
+                });
+            },
+            getMoretodoInfo() {
+                layer.open({
+                    type: 2,
+                    title: '',
+                    shadeClose: true,
+                    area: ['50%', '80%'],
+                    content: 'index_more_todo.html'
+                })
+            },
+            getPermMenus() {
+                var that = this;
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    url: userUrl + "/sso/ssoResource/getchildSysResource",
+                    data: Qs.stringify({
+                        "code": that.systemCode
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        that.permsMenus = res.data.data.chilSystemList
+                    }
+                });
+            },
+            systemMenuCom(obj, isChilSys) {
+                var that = this;
+                var url = obj.componentUrl;
+                if (isChilSys) {
+                    that.getMyfPerms(code);
+                }
+                if (url === '') {
+                    if (obj.children.length > 0) {
+                        url = obj.children[0].componentUrl;
+                    }
+                } else if (url === that.firstHtml) {
+                    that.firstOpen()
+                }
+
+                //$('#content-main .componet-one').hide()
+                $("#content-main").html('<iframe  height="100%" src="' + url + '"?code=' + obj.code + '" width="100%" id="iframe-icon"></iframe>')
+            },
+            systemMenuOpen(url, code, isChilSys) {
+                var that = this;
+                if (isChilSys) {
+                    that.getMyfPerms(code)
+                }
+
+                $("#content-main").html('<iframe  height="100%" src="' + url + '"?code=' + code + '" width="100%" id="iframe-icon"></iframe>')
+            },
+            loginOut() {
+                var that = this;
+                window.location.href = "login.html?systemCode=" + that.systemCode
+            }
+        },
+        watch: {
+            myMenus: function () {
+                var that = this;
+                that.$nextTick(function () {
+                    menuset();
+                    dataIndex()
+                });
+            }
+        }
+    })
+
+
+
+
+
+</script>
+</body>
+
+
+</html>

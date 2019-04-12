@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>添智·智慧工会云服务平台</title>
+    <meta name="keywords">
+    <meta name="description">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+<style>
+    .col-sm-8 input.form-control, .col-sm-8 select.form-control {
+        width: 50%;
+        display: inline-block;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .time-cen{
+        float: left;
+        margin: 8px 10px;
+    }
+    .form-group .col-sm-5 input{
+        float: left;
+    }
+</style>
+<body>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-content">
+                <form class="form-horizontal m-t" id="transfer" v-cloak>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 姓名：</label>
+                        <div class="col-sm-8">
+                            <input  v-model="Detailslist.memName" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 所属工会：</label>
+                        <div class="col-sm-8">
+                            <input  v-model="Detailslist.laborName" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 所属单位：</label>
+                        <div class="col-sm-8">
+                            <input  v-model="Detailslist.unitName" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 联系电话：</label>
+                        <div class="col-sm-8">
+                            <input v-model="Detailslist.contactPhone" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 申请状态：</label>
+                        <div class="col-sm-8">
+                            <input  v-model="Detailslist.applyStatusText" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 审批原因：</label>
+                        <div class="col-sm-8">
+                            <input  v-model="Detailslist.remark" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 来源：</label>
+                        <div class="col-sm-8">
+                            <input  v-model="Detailslist.sourceText" class="form-control" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span style="color: red;">*</span> 证件照片：</label>
+                        <div class="col-sm-8">
+                        <div style="float:left">
+                            <div class="uoloadfile">
+                                <img style="width:100%;height:100%;z-index:1;"
+                                     v-bind:src="cardFrontPic"/>
+                            </div>
+                        </div>
+                        <div style="float:left">
+                            <div class="uoloadfile">
+                                <img style="width:100%;height:100%;z-index:1;"
+                                     v-bind:src="cardReversePic"/>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 全局js -->
+<script src="js/jquery.min.js?v=2.1.4"></script>
+<script src="js/bootstrap.min.js?v=3.3.6"></script>
+<script src="js/baseaddr.js"></script>
+<script src="js/plugins/layer/layer.min.js"></script>
+
+<script src="js/vue2.5.22.js"></script>
+<script src="js/ixios.0.18.0.js"></script>
+<script src="js/qs.6.60.js"></script>
+<!-- 自定义js -->
+<!-- jQuery Validation plugin javascript-->
+<script src="js/plugins/validate/jquery.validate.min.js"></script>
+<script src="js/demo/form-validate-sytle.js"></script>
+<script src="js/plugins/validate/messages_zh.min.js"></script>
+<script src="js/plugins/layer/laydate/laydate.js"></script>
+
+
+<script>
+
+    var vm = new Vue({
+        el:'#transfer',
+        data:{
+            Detailslist: [],
+            id: '',
+            cardFrontPic : '',
+            cardReversePic: '',
+            figure: '',
+            addr:'/file/images/'
+        },
+        methods: {
+            getA10Base: function () {
+                var that = this;
+                axios({
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    url: baseUrl + "/passLaborweb/api/laborun//a10ApplyInfo/query",
+                    data: JSON.stringify({
+                        "id": that.id
+                    })
+                }).then(function (res) {
+                    if (res.data.code === '0') {
+                        if( res.data.data !==null){
+                            that.Detailslist = res.data.data;
+                            that.cardReversePic = that.addr + that.Detailslist.cardReversePic
+                            that.cardFrontPic = that.addr + that.Detailslist.cardFrontPic
+                            that.figure = that.addr + that.Detailslist.figure
+                        }
+                    }
+                });
+            }
+        },
+        mounted() {
+            var that = this;
+            var url = location.search; //获取url中"?"符后的字串
+            console.log(url);
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                that.id = decodeURIComponent(strs[0].split("=")[1]);
+            }
+            that.getA10Base();
+
+        }
+    })
+
+
+</script>
+</body>
+</html>
